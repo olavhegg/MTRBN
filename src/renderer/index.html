@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meeting Room Setup</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Meeting Room Setup</h1>
+        
+        <form id="setupForm">
+            <div class="form-group">
+                <label for="deviceType">Device Type:</label>
+                <select id="deviceType" required>
+                    <option value="">Select Device Type</option>
+                    <option value="tap-scheduler">Tap Scheduler Panel</option>
+                    <option value="tap-ip">Tap IP Panel</option>
+                    <option value="tap">Tap Panel</option>
+                    <option value="rallybar">Rallybar</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="serialNumber">Serial Number:</label>
+                <input type="text" id="serialNumber" required>
+                <small>Must end with the number 2</small>
+            </div>
+
+            <div class="form-group">
+                <label for="macAddress">MAC Address:</label>
+                <input type="text" id="macAddress" required pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$">
+                <small>Format: XX:XX:XX:XX:XX:XX</small>
+            </div>
+
+            <div class="form-group">
+                <label for="upn">UPN:</label>
+                <input type="text" id="upn" required>
+                <small>Format: @banenor.onmicrosoft.com</small>
+            </div>
+
+            <div class="actions">
+                <button type="button" id="provisionIntune" disabled>Provision in Intune</button>
+                <button type="button" id="provisionTAC" disabled>Provision in TAC</button>
+                <button type="button" id="generateCode" disabled>Generate Daily Code</button>
+            </div>
+        </form>
+
+        <div id="status" class="status-container"></div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html> 

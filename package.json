@@ -1,0 +1,35 @@
+{
+  "name": "meeting-room-setup",
+  "version": "1.0.0",
+  "description": "Meeting Room Setup Application for Logitech Devices",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["electron", "meeting-room", "teams", "intune"],
+  "author": "",
+  "license": "ISC",
+  "build": {
+    "appId": "com.banenor.meetingroom",
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "dependencies": {
+    "@azure/msal-node": "^1.14.6",
+    "@microsoft/microsoft-graph-client": "^3.0.4",
+    "dotenv": "^16.0.3",
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0"
+  }
+} 
