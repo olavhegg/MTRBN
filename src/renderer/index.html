@@ -187,20 +187,17 @@
 
             <div id="codes" class="tab-panel">
                 <div class="codes-container">
-                    <div class="unprovisioned-section">
-                        <h3>Unprovisioned Rooms</h3>
+                    <div class="unassigned-section">
+                        <h3>Provisioned, Unassigned Rooms</h3>
+                        <div class="codes-controls">
+                            <button type="button" id="generateSelectedCodes" class="btn-generate">Generate Selected Codes</button>
+                            <button type="button" id="refreshRooms" class="btn-refresh">Refresh List</button>
+                        </div>
                         <div id="unprovisionedList" class="room-list">
                             <!-- Will be populated dynamically -->
                         </div>
-                    </div>
-
-                    <div class="codes-section">
-                        <div class="codes-header">
-                            <h3>Daily Codes</h3>
-                            <button type="button" id="refreshRooms" class="btn-refresh">Refresh List</button>
-                        </div>
-                        <div id="codesList" class="codes-list">
-                            <!-- Will be populated dynamically -->
+                        <div id="generatedCodes" class="generated-codes">
+                            <!-- Will be populated with generated codes -->
                         </div>
                     </div>
                 </div>

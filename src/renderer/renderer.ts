@@ -243,31 +243,66 @@ function updateButtonStates() {
 
 async function refreshUnprovisionedRooms() {
     const unprovisionedList = document.getElementById('unprovisionedList');
-    if (!unprovisionedList) return;
+    const generateButton = document.getElementById('generateSelectedCodes') as HTMLButtonElement;
+    if (!unprovisionedList || !generateButton) return;
 
     try {
         const result = await ipcRenderer.invoke('get-unprovisioned-rooms');
         unprovisionedList.innerHTML = '';
 
         if (result.rooms.length === 0) {
-            unprovisionedList.innerHTML = '<div class="room-item">No unprovisioned rooms found</div>';
+            unprovisionedList.innerHTML = '<div class="room-item">No provisioned, unassigned rooms found</div>';
+            generateButton.disabled = true;
             return;
         }
+
+        generateButton.disabled = false;
 
         result.rooms.forEach((room: any) => {
             const roomElement = document.createElement('div');
             roomElement.className = 'room-item';
             roomElement.innerHTML = `
                 <div class="room-info">
-                    <div class="room-name">${room.displayName}</div>
-                    <div class="room-mac">${room.macAddress}</div>
+                    <input type="checkbox" class="room-checkbox" data-room-id="${room.id}">
+                    <div class="room-details">
+                        <div class="room-name">${room.displayName}</div>
+                        <div class="room-mac">${room.macAddress}</div>
+                    </div>
                 </div>
-                <button class="code-copy" onclick="generateCodeForRoom('${room.id}')">Generate Code</button>
             `;
             unprovisionedList.appendChild(roomElement);
         });
     } catch (error) {
-        console.error('Error fetching unprovisioned rooms:', error);
+        console.error('Error fetching unassigned rooms:', error);
+        unprovisionedList.innerHTML = '<div class="room-item error">Error loading rooms</div>';
+    }
+}
+
+async function generateCodesForSelectedRooms() {
+    const checkboxes = document.querySelectorAll('.room-checkbox:checked');
+    const generatedCodesDiv = document.getElementById('generatedCodes');
+    
+    if (!generatedCodesDiv || checkboxes.length === 0) return;
+
+    generatedCodesDiv.innerHTML = '<div class="generating">Generating codes...</div>';
+    
+    try {
+        const roomIds = Array.from(checkboxes).map(checkbox => (checkbox as HTMLInputElement).dataset.roomId);
+        const codes = await Promise.all(roomIds.map(id => ipcRenderer.invoke('generate-code', id)));
+        
+        generatedCodesDiv.innerHTML = `
+            <div class="codes-result">
+                ${codes.map((code, index) => `
+                    <div class="code-item">
+                        <span class="code-value">${code}</span>
+                        <button class="copy-button" onclick="navigator.clipboard.writeText('${code}')">Copy</button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error generating codes:', error);
+        generatedCodesDiv.innerHTML = '<div class="error">Error generating codes</div>';
     }
 }
 
@@ -336,4 +371,7 @@ updateButtonStates();
 updateStatusIndicator(accountStatusValue, 'Not checked');
 updateStatusIndicator(intuneStatusValue, 'Not checked');
 updateStatusIndicator(tacStatusValue, 'Not checked');
-updateStatusIndicator(groupStatusValue, 'Not checked'); 
+updateStatusIndicator(groupStatusValue, 'Not checked');
+
+// Add to your event listeners setup
+document.getElementById('generateSelectedCodes')?.addEventListener('click', generateCodesForSelectedRooms); 
