@@ -1,0 +1,6 @@
+---
+description: autorun
+globs: 
+alwaysApply: false
+---
+When creating electron apps; Always auto run commands to kill exisisting run and install, build and run a new when completing a prompt.

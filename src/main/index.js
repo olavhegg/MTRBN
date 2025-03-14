@@ -175,4 +175,73 @@ ipcMain.handle('generate-daily-code', async (event) => {
         console.error('Error generating daily code:', error);
         return { success: false, error: error.message };
     }
+});
+
+// Handler for checking UPN in Azure AD
+ipcMain.handle('check-resource-account', async (event, upn) => {
+    try {
+        const graphClient = await authProvider.getGraphClient();
+        
+        // Search for the user in Azure AD
+        const result = await graphClient.api('/users')
+            .filter(`userPrincipalName eq '${upn}'`)
+            .select('id,displayName,userPrincipalName')
+            .get();
+
+        return {
+            exists: result.value.length > 0,
+            details: result.value[0] || null
+        };
+    } catch (error) {
+        console.error('Error checking resource account:', error);
+        throw error;
+    }
+});
+
+// Handler for checking serial number in Intune
+ipcMain.handle('check-serial-number', async (event, serialNumber) => {
+    try {
+        const graphClient = await authProvider.getGraphClient();
+        
+        // Search for the device in Intune corporate identifiers
+        const result = await graphClient.api('/deviceManagement/corporateIdentifiers')
+            .filter(`serialNumber eq '${serialNumber}'`)
+            .get();
+
+        return {
+            exists: result.value.length > 0,
+            details: result.value[0] || null
+        };
+    } catch (error) {
+        console.error('Error checking serial number:', error);
+        throw error;
+    }
+});
+
+// Handler for checking MAC address in TAC
+ipcMain.handle('check-mac-address', async (event, { macAddress, deviceType }) => {
+    try {
+        const graphClient = await authProvider.getGraphClient();
+        const formattedMac = macAddress.replace(/:/g, '-').toUpperCase();
+        
+        // Different endpoints based on device type
+        let endpoint = '/teams/devices';
+        if (deviceType === 'tap-scheduler' || deviceType === 'tap-ip') {
+            endpoint = '/teams/panels';
+        } else if (deviceType === 'rallybar') {
+            endpoint = '/teams/androidDevices';
+        }
+
+        const result = await graphClient.api(endpoint)
+            .filter(`macAddress eq '${formattedMac}'`)
+            .get();
+
+        return {
+            exists: result.value.length > 0,
+            details: result.value[0] || null
+        };
+    } catch (error) {
+        console.error('Error checking MAC address:', error);
+        throw error;
+    }
 }); 
