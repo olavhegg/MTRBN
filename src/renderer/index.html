@@ -120,7 +120,7 @@
                             <option value="tap">Tap Panel</option>
                             <option value="rallybar">Rallybar</option>
                         </select>
-                        <small>Select device type to determine required groups</small>
+                        <small>Select the device type to determine setup requirements and required group memberships</small>
                     </div>
 
                     <div class="form-group">
@@ -186,21 +186,27 @@
             </div>
 
             <div id="codes" class="tab-panel">
-                <div class="codes-container">
-                    <div class="unassigned-section">
+                <form id="codesForm" class="form-container">
+                    <div class="form-group">
                         <h3>Provisioned, Unassigned Rooms</h3>
+                        <small>Select rooms to generate login codes for initial device setup</small>
+                        
                         <div class="codes-controls">
-                            <button type="button" id="generateSelectedCodes" class="btn-generate">Generate Selected Codes</button>
+                            <button type="button" id="generateSelectedCodes" class="btn-generate" disabled>Generate Codes for Selected Devices</button>
                             <button type="button" id="refreshRooms" class="btn-refresh">Refresh List</button>
                         </div>
-                        <div id="unprovisionedList" class="room-list">
-                            <!-- Will be populated dynamically -->
+                        
+                        <div class="room-list-container">
+                            <div id="unprovisionedList" class="room-list">
+                                <!-- Will be populated dynamically -->
+                            </div>
                         </div>
+                        
                         <div id="generatedCodes" class="generated-codes">
                             <!-- Will be populated with generated codes -->
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>

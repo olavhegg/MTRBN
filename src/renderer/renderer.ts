@@ -106,11 +106,14 @@ function setupTabNavigation() {
 function setupInputValidation() {
     setupSerialNumberValidation();
     setupMacAddressValidation();
+    setupUpnValidation();
 }
 
 function setupSerialNumberValidation() {
     const serialNumberInput = document.getElementById('serialNumber') as HTMLInputElement;
     if (serialNumberInput) {
+        serialNumberInput.maxLength = 12;
+        
         serialNumberInput.addEventListener('input', (e: Event) => {
             const input = e.target as HTMLInputElement;
             let value = input.value.toUpperCase();
@@ -152,6 +155,16 @@ function setupMacAddressValidation() {
             const isValid = /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/.test(formattedValue);
             input.setCustomValidity(isValid ? '' : 'Please enter a valid MAC address');
             input.reportValidity();
+        });
+    }
+}
+
+function setupUpnValidation() {
+    const upnInput = document.getElementById('upn') as HTMLInputElement;
+    if (upnInput) {
+        upnInput.addEventListener('input', (e: Event) => {
+            const input = e.target as HTMLInputElement;
+            input.value = input.value.toUpperCase();
         });
     }
 }
@@ -256,8 +269,6 @@ async function refreshUnprovisionedRooms() {
             return;
         }
 
-        generateButton.disabled = false;
-
         result.rooms.forEach((room: any) => {
             const roomElement = document.createElement('div');
             roomElement.className = 'room-item';
@@ -272,9 +283,27 @@ async function refreshUnprovisionedRooms() {
             `;
             unprovisionedList.appendChild(roomElement);
         });
+
+        // Add event listeners to checkboxes
+        const checkboxes = unprovisionedList.querySelectorAll('.room-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateGenerateButtonState);
+        });
+
+        // Initial button state
+        updateGenerateButtonState();
     } catch (error) {
         console.error('Error fetching unassigned rooms:', error);
         unprovisionedList.innerHTML = '<div class="room-item error">Error loading rooms</div>';
+    }
+}
+
+function updateGenerateButtonState() {
+    const generateButton = document.getElementById('generateSelectedCodes') as HTMLButtonElement;
+    const checkedBoxes = document.querySelectorAll('.room-checkbox:checked');
+    
+    if (generateButton) {
+        generateButton.disabled = checkedBoxes.length === 0;
     }
 }
 
