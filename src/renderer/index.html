@@ -8,18 +8,21 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="../../Bane_NOR_logo.svg.png" alt="Bane NOR Logo" class="logo">
-            <h1>MTR Setup Tool</h1>
+            <div class="header-content">
+                <img src="../../Bane_NOR_logo.svg.png" alt="Bane NOR Logo" class="logo">
+                <h1>MTR Setup Tool</h1>
+                <button id="quitButton" class="quit-button">Quit</button>
+            </div>
         </div>
 
         <nav class="nav-tabs">
-            <a href="#info" class="nav-tab">Information</a>
+            <a href="#info" class="nav-tab active">Information</a>
             <a href="#setup" class="nav-tab">Device Setup</a>
             <a href="#codes" class="nav-tab">Generate Daily Codes</a>
         </nav>
 
         <div class="tab-panels">
-            <div id="info" class="tab-panel">
+            <div id="info" class="tab-panel active">
                 <div class="info-container">
                     <h2>MTR Setup Information</h2>
                     
@@ -211,6 +214,6 @@
         </div>
     </div>
 
-    <script src="renderer.js"></script>
+    <script src="index.js"></script>
 </body>
 </html> 

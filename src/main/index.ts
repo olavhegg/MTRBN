@@ -55,14 +55,14 @@ function copyRendererFiles() {
             fs.mkdirSync(destDir, { recursive: true });
         }
         
-        // Copy all necessary files
-        const filesToCopy = ['index.html', 'styles.css', 'renderer.js'];
+        // Copy only HTML and CSS files, JavaScript will be handled by webpack
+        const filesToCopy = ['index.html', 'styles.css'];
         filesToCopy.forEach(file => {
             const srcPath = path.join(srcDir, file);
             const destPath = path.join(destDir, file);
             
             if (fs.existsSync(srcPath)) {
-                fs.copyFileSync(srcPath, file === 'renderer.js' ? destPath : path.join(destDir, file));
+                fs.copyFileSync(srcPath, destPath);
                 console.log(`Copied ${file} successfully`);
             } else {
                 console.warn(`Source file not found: ${srcPath}`);
@@ -78,10 +78,9 @@ function createWindow() {
         width: 1200,
         height: 800,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-            webSecurity: false,
-            devTools: process.env.NODE_ENV === 'development'
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, '../preload.js')
         }
     });
 
