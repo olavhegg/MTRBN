@@ -1273,27 +1273,20 @@ button {
 }
 
 .provision-btn {
+    display: block;
+    margin: 1.5rem auto;
+    padding: 0.75rem 2rem;
     background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
     border-radius: 4px;
     font-size: 1rem;
-    font-weight: 500;
     cursor: pointer;
-    width: 100%;
-    margin-top: 1rem;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 }
 
-.provision-btn:hover:not(:disabled) {
-    background-color: #0747A6;
-}
-
-.provision-btn:disabled {
-    background-color: #e9ecef;
-    color: #adb5bd;
-    cursor: not-allowed;
+.provision-btn:hover {
+    background-color: #2A357A;
 }
 
 #deviceSetupSection {
@@ -1490,11 +1483,12 @@ button {
 .centered-section {
     max-width: 600px;
     margin: 0 auto 2rem auto;
-    text-align: center;
+    padding: 0 15px;
 }
 
 .centered-section h2 {
     margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 .centered-section .form-group {

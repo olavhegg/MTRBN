@@ -11,6 +11,9 @@ interface DeviceIdentity {
     importedDeviceIdentifier: string;
     description: string;
     enrollmentState: string;
+    importedDeviceIdentityType: string;
+    platform: string;
+    lastContactedDateTime?: string;
 }
 
 interface UserAccount {
@@ -199,7 +202,9 @@ class GraphService {
             const device: DeviceIdentity = {
                 importedDeviceIdentifier: serialNumber,
                 description: description,
-                enrollmentState: 'notContacted'
+                enrollmentState: 'notContacted',
+                importedDeviceIdentityType: 'serialNumber',
+                platform: 'unknown'
             };
             
             console.log(`[GraphService] Posting to deviceManagement API...`);

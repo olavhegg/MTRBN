@@ -78,11 +78,15 @@
                 </div>
 
                 <div id="deviceSetupSection" class="form-section centered-section hidden">
-                    <h2>Device Setup</h2>
+                    <h2>Provision New Device</h2>
+                    <div class="form-group">
+                        <label for="provisionSerialNumber">Serial Number:</label>
+                        <input type="text" id="provisionSerialNumber" readonly>
+                    </div>
                     <div class="form-group">
                         <label for="description">Device Description:</label>
                         <input type="text" id="description" required placeholder="Enter a description for this device">
-                        <small>Example: Logitech MTR Device B260 - Meeting Room 1</small>
+                        <small>Example: Logitech Rallybar B260 S33</small>
                     </div>
                     <button type="button" id="provisionIntuneBtn" class="provision-btn">Register in Intune</button>
                 </div>

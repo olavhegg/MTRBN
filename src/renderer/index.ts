@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const resetBtn = document.getElementById('resetBtn');
         const startButtons = document.querySelectorAll('.start-btn');
         const checkSerialBtn = document.getElementById('checkSerialBtn');
+        const provisionSerialNumberInput = document.getElementById('provisionSerialNumber');
 
         // Create a container for status messages if needed
         let statusContainer = document.querySelector('.status-container');
@@ -214,6 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Show the device setup section
                                 if (deviceSetupSection) {
                                     deviceSetupSection.classList.remove('hidden');
+                                    
+                                    // Set the serial number in the provision section
+                                    if (provisionSerialNumberInput) {
+                                        (provisionSerialNumberInput as HTMLInputElement).value = serialNumber;
+                                    }
+                                    
                                     // Set focus on description field
                                     if (deviceDescription) {
                                         (deviceDescription as HTMLInputElement).focus();
@@ -437,11 +444,13 @@ function resetForm() {
     const displayNameInput = document.getElementById('displayName') as HTMLInputElement;
     const descriptionInput = document.getElementById('description') as HTMLInputElement;
     const checkSerialBtn = document.getElementById('checkSerialBtn') as HTMLButtonElement;
+    const provisionSerialNumberInput = document.getElementById('provisionSerialNumber') as HTMLInputElement;
     
     if (serialNumberInput) serialNumberInput.value = '';
     if (upnInput) upnInput.value = '';
     if (displayNameInput) displayNameInput.value = '';
     if (descriptionInput) descriptionInput.value = '';
+    if (provisionSerialNumberInput) provisionSerialNumberInput.value = '';
     if (checkSerialBtn) checkSerialBtn.disabled = true;
     
     // Hide results section
