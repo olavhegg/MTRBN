@@ -36,6 +36,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = __importStar(require("path"));
 require("dotenv/config");
+// Prevent multiple instances
+const gotTheLock = electron_1.app.requestSingleInstanceLock();
+if (!gotTheLock) {
+    electron_1.app.quit();
+}
+else {
+    // Enable live reload in development
+    if (process.env.NODE_ENV === 'development') {
+        try {
+            require('electron-reloader')(module, {
+                debug: false,
+                watchRenderer: false,
+            });
+        }
+        catch (_) { }
+    }
+}
 let mainWindow = null;
 function createWindow() {
     mainWindow = new electron_1.BrowserWindow({
@@ -50,6 +67,14 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 }
+// Handle second instance
+electron_1.app.on('second-instance', () => {
+    if (mainWindow) {
+        if (mainWindow.isMinimized())
+            mainWindow.restore();
+        mainWindow.focus();
+    }
+});
 // IPC Handlers
 electron_1.ipcMain.handle('quit-app', () => {
     electron_1.app.quit();

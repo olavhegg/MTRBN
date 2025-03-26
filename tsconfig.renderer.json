@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
+    "module": "ES2020",
     "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "./dist/renderer",
+    "rootDir": "./src/renderer",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
   "include": [
-    "src/main/**/*",
-    "src/preload.ts"
+    "src/renderer/**/*"
   ],
   "exclude": [
     "node_modules",

@@ -1,23 +1,17 @@
-// Declare this as a module to allow global augmentation
-export {};
-
-// Define the IPC interface
-interface IpcRenderer {
-    invoke(channel: string, ...args: any[]): Promise<any>;
-    on(channel: string, func: (...args: any[]) => void): void;
-    once(channel: string, func: (...args: any[]) => void): void;
-    removeListener(channel: string, func: (...args: any[]) => void): void;
-}
-
-declare global {
-    interface Window {
-        electron: {
-            ipcRenderer: IpcRenderer;
-        }
+// Status tracking
+let currentStatus = {
+    intuneStatus: false,
+    tacStatus: false,
+    accountStatus: false,
+    groupsStatus: {},
+    isProvisioned: {
+        intune: false,
+        tac: false
     }
-}
+};
 
-const { ipcRenderer } = window.electron;
+// Get the electron API from the window object
+const { ipcRenderer } = (window as any).electron;
 
 // Interface definitions
 interface DeviceStatus {
@@ -30,18 +24,6 @@ interface DeviceStatus {
         tac: boolean;
     };
 }
-
-// Status tracking
-let currentStatus: DeviceStatus = {
-    intuneStatus: false,
-    tacStatus: false,
-    accountStatus: false,
-    groupsStatus: {},
-    isProvisioned: {
-        intune: false,
-        tac: false
-    }
-};
 
 // Helper Functions
 function updateStatusIndicator(element: HTMLElement, status: string, type: 'success' | 'error' | 'warning' = 'warning') {
@@ -629,14 +611,14 @@ function resetForm() {
 
 async function validateSerialNumber(serialNumber: string) {
     try {
-        const validation = await window.electron.ipcRenderer.invoke('validate-device', serialNumber) as DeviceValidation;
+        const validation = await ipcRenderer.invoke('validate-device', serialNumber) as DeviceValidation;
         
         serialValidation.textContent = validation.validationMessage;
         serialValidation.className = `validation-message ${validation.isValid ? 'valid' : 'invalid'}`;
         
         if (validation.isValid) {
             // Check if device is already in Intune
-            const device = await window.electron.ipcRenderer.invoke('check-device-serial', serialNumber);
+            const device = await ipcRenderer.invoke('check-device-serial', serialNumber);
             deviceProvisioned = !!device;
             
             // Show device setup section if device is valid but not provisioned
@@ -666,7 +648,7 @@ setupForm.addEventListener('submit', async (e) => {
     showLoader();
 
     try {
-        const results = await window.electron.ipcRenderer.invoke('setup-device', {
+        const results = await ipcRenderer.invoke('setup-device', {
             serialNumber: serialNumberInput.value,
             description: descriptionInput.value,
             upn: upnInput.value,
@@ -692,7 +674,7 @@ setupForm.addEventListener('submit', async (e) => {
 provisionIntuneBtn.addEventListener('click', async () => {
     showLoader();
     try {
-        const result = await window.electron.ipcRenderer.invoke('provision-device', {
+        const result = await ipcRenderer.invoke('provision-device', {
             serialNumber: serialNumberInput.value,
             description: descriptionInput.value
         });
@@ -729,7 +711,7 @@ upnInput.addEventListener('input', (e) => {
 // Auto-generate description if empty when serial is entered
 serialNumberInput.addEventListener('change', async () => {
     if (!descriptionInput.value && serialNumberInput.value) {
-        const validation = await window.electron.ipcRenderer.invoke('validate-device', serialNumberInput.value) as DeviceValidation;
+        const validation = await ipcRenderer.invoke('validate-device', serialNumberInput.value) as DeviceValidation;
         descriptionInput.value = `Logitech Device ${serialNumberInput.value}`;
     }
 });
@@ -749,5 +731,5 @@ upnInput.addEventListener('change', () => {
 
 // Add quit button event listener
 quitButton.addEventListener('click', () => {
-    window.electron.ipcRenderer.invoke('quit-app');
+    ipcRenderer.invoke('quit-app');
 }); 

@@ -1,7 +1,0 @@
-{
-  "watch": ["dist/main"],
-  "ignore": ["dist/renderer/*"],
-  "ext": "js",
-  "delay": "1000",
-  "exec": "electron ."
-} 
