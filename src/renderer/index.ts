@@ -500,4 +500,254 @@ async function generateCodesForSelectedRooms() {
         console.error('Error generating codes:', error);
         generatedCodesDiv.innerHTML = '<div class="error">Error generating codes</div>';
     }
-} 
+}
+
+interface SetupResults {
+    success: boolean;
+    device: any;
+    user: any;
+    groups: string[];
+    errors: string[];
+    error?: string;
+}
+
+interface DeviceValidation {
+    type: string;
+    isValid: boolean;
+    validationMessage: string;
+}
+
+// DOM Elements
+const setupForm = document.getElementById('setupForm') as HTMLFormElement;
+const serialNumberInput = document.getElementById('serialNumber') as HTMLInputElement;
+const descriptionInput = document.getElementById('description') as HTMLInputElement;
+const upnInput = document.getElementById('upn') as HTMLInputElement;
+const displayNameInput = document.getElementById('displayName') as HTMLInputElement;
+const deviceSetupSection = document.getElementById('deviceSetupSection') as HTMLDivElement;
+const provisionIntuneBtn = document.getElementById('provisionIntuneBtn') as HTMLButtonElement;
+const serialValidation = document.getElementById('serialValidation') as HTMLDivElement;
+const resultsDiv = document.getElementById('results') as HTMLDivElement;
+const deviceStatus = document.getElementById('deviceStatus') as HTMLPreElement;
+const userStatus = document.getElementById('userStatus') as HTMLPreElement;
+const groupStatus = document.getElementById('groupStatus') as HTMLPreElement;
+const resetBtn = document.getElementById('resetBtn') as HTMLButtonElement;
+const loader = document.getElementById('loader') as HTMLDivElement;
+const toast = document.getElementById('toast') as HTMLDivElement;
+const toastMessage = document.getElementById('toastMessage') as HTMLSpanElement;
+const quitButton = document.getElementById('quitButton') as HTMLButtonElement;
+
+// Tab Elements
+const tabButtons = document.querySelectorAll('.tab-btn') as NodeListOf<HTMLButtonElement>;
+const tabContents = document.querySelectorAll('.tab-content') as NodeListOf<HTMLDivElement>;
+const startButtons = document.querySelectorAll('.start-btn') as NodeListOf<HTMLButtonElement>;
+
+let deviceProvisioned = false;
+
+// Tab Switching
+function switchTab(tabId: string) {
+    // Update tab buttons
+    tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+    });
+
+    // Update tab contents
+    tabContents.forEach(content => {
+        content.classList.toggle('active', content.id === tabId);
+    });
+}
+
+// Event Listeners for Tabs
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const tabId = button.dataset.tab;
+        if (tabId) switchTab(tabId);
+    });
+});
+
+// Event Listeners for Welcome Screen Buttons
+startButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const tabId = button.dataset.goto;
+        if (tabId) switchTab(tabId);
+    });
+});
+
+// Helper Functions
+function showLoader() {
+    loader.classList.remove('hidden');
+}
+
+function hideLoader() {
+    loader.classList.add('hidden');
+}
+
+function showToast(message: string, isError = false) {
+    toastMessage.textContent = message;
+    toast.className = `toast ${isError ? 'error' : 'success'}`;
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 3000);
+}
+
+function showResults(results: SetupResults) {
+    resultsDiv.classList.remove('hidden');
+    setupForm.classList.add('hidden');
+
+    // Format device status
+    if (results.device) {
+        deviceStatus.textContent = `✅ Device registered in Intune\nSerial: ${results.device.importedDeviceIdentifier}\nDescription: ${results.device.description}`;
+    } else if (deviceProvisioned) {
+        deviceStatus.textContent = '✅ Device already provisioned in Intune';
+    } else {
+        deviceStatus.textContent = 'ℹ️ Device not provisioned in Intune';
+    }
+
+    // Format user status
+    userStatus.textContent = results.user
+        ? `✅ User account ready\nUPN: ${results.user.userPrincipalName}\nDisplay Name: ${results.user.displayName}`
+        : '❌ Failed to setup user account';
+
+    // Format group status
+    if (results.groups.length > 0) {
+        groupStatus.textContent = '✅ Added to groups:\n' + results.groups.join('\n');
+    } else {
+        groupStatus.textContent = '❌ No groups were added';
+    }
+}
+
+function resetForm() {
+    setupForm.reset();
+    resultsDiv.classList.add('hidden');
+    setupForm.classList.remove('hidden');
+    serialValidation.textContent = '';
+    serialValidation.className = 'validation-message';
+    deviceSetupSection.classList.add('hidden');
+    deviceProvisioned = false;
+    switchTab('welcome');
+}
+
+async function validateSerialNumber(serialNumber: string) {
+    try {
+        const validation = await window.electron.ipcRenderer.invoke('validate-device', serialNumber) as DeviceValidation;
+        
+        serialValidation.textContent = validation.validationMessage;
+        serialValidation.className = `validation-message ${validation.isValid ? 'valid' : 'invalid'}`;
+        
+        if (validation.isValid) {
+            // Check if device is already in Intune
+            const device = await window.electron.ipcRenderer.invoke('check-device-serial', serialNumber);
+            deviceProvisioned = !!device;
+            
+            // Show device setup section if device is valid but not provisioned
+            deviceSetupSection.classList.remove('hidden');
+            if (deviceProvisioned) {
+                provisionIntuneBtn.textContent = 'Already Provisioned';
+                provisionIntuneBtn.disabled = true;
+            } else {
+                provisionIntuneBtn.textContent = 'Provision in Intune';
+                provisionIntuneBtn.disabled = false;
+            }
+        } else {
+            deviceSetupSection.classList.add('hidden');
+        }
+        
+        return validation.isValid;
+    } catch (error) {
+        console.error('Error validating serial number:', error);
+        return false;
+    }
+}
+
+// Event Listeners
+setupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    showLoader();
+
+    try {
+        const results = await window.electron.ipcRenderer.invoke('setup-device', {
+            serialNumber: serialNumberInput.value,
+            description: descriptionInput.value,
+            upn: upnInput.value,
+            displayName: displayNameInput.value,
+            shouldProvisionInIntune: false // Device provisioning is handled separately now
+        }) as SetupResults;
+
+        hideLoader();
+
+        if (results.success) {
+            showToast('Resource account created successfully');
+            showResults(results);
+        } else {
+            showToast(results.error || 'Failed to create resource account', true);
+        }
+    } catch (error) {
+        hideLoader();
+        showToast('An unexpected error occurred', true);
+        console.error('Setup error:', error);
+    }
+});
+
+provisionIntuneBtn.addEventListener('click', async () => {
+    showLoader();
+    try {
+        const result = await window.electron.ipcRenderer.invoke('provision-device', {
+            serialNumber: serialNumberInput.value,
+            description: descriptionInput.value
+        });
+        
+        if (result.success) {
+            deviceProvisioned = true;
+            provisionIntuneBtn.textContent = 'Already Provisioned';
+            provisionIntuneBtn.disabled = true;
+            showToast('Device provisioned successfully in Intune');
+        } else {
+            showToast('Failed to provision device in Intune', true);
+        }
+    } catch (error) {
+        showToast('Error provisioning device', true);
+        console.error('Provision error:', error);
+    }
+    hideLoader();
+});
+
+resetBtn.addEventListener('click', resetForm);
+
+// Form validation and auto-formatting
+serialNumberInput.addEventListener('input', (e) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.toUpperCase().replace(/[^0-9A-Z]/g, '');
+    validateSerialNumber(input.value);
+});
+
+upnInput.addEventListener('input', (e) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.toLowerCase();
+});
+
+// Auto-generate description if empty when serial is entered
+serialNumberInput.addEventListener('change', async () => {
+    if (!descriptionInput.value && serialNumberInput.value) {
+        const validation = await window.electron.ipcRenderer.invoke('validate-device', serialNumberInput.value) as DeviceValidation;
+        descriptionInput.value = `Logitech Device ${serialNumberInput.value}`;
+    }
+});
+
+// Auto-generate display name if empty when UPN is entered
+upnInput.addEventListener('change', () => {
+    if (!displayNameInput.value && upnInput.value) {
+        const roomName = upnInput.value.split('@')[0];
+        displayNameInput.value = roomName
+            .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space between camelCase
+            .replace(/[-_]/g, ' ') // Replace hyphens and underscores with spaces
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
+});
+
+// Add quit button event listener
+quitButton.addEventListener('click', () => {
+    window.electron.ipcRenderer.invoke('quit-app');
+}); 

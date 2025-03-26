@@ -6,7 +6,19 @@ contextBridge.exposeInMainWorld(
     'electron',
     {
         ipcRenderer: {
-            invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
+            invoke: (channel: string, ...args: any[]) => {
+                const validChannels = [
+                    'validate-device',
+                    'check-device-serial',
+                    'provision-device',
+                    'setup-device',
+                    'quit-app'
+                ];
+                if (validChannels.includes(channel)) {
+                    return ipcRenderer.invoke(channel, ...args);
+                }
+                throw new Error(`Invalid channel: ${channel}`);
+            },
             on: (channel: string, func: (...args: any[]) => void) => {
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             },

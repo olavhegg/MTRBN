@@ -2,218 +2,121 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Meeting Room Setup</title>
+    <title>MTR Setup Assistant</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <header>
             <div class="header-content">
                 <img src="../../Bane_NOR_logo.svg.png" alt="Bane NOR Logo" class="logo">
-                <h1>MTR Setup Tool</h1>
+                <h1>MTR Setup Assistant</h1>
                 <button id="quitButton" class="quit-button">Quit</button>
             </div>
-        </div>
+        </header>
 
-        <nav class="nav-tabs">
-            <a href="#info" class="nav-tab active">Information</a>
-            <a href="#setup" class="nav-tab">Device Setup</a>
-            <a href="#codes" class="nav-tab">Generate Daily Codes</a>
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="welcome">Welcome</button>
+            <button class="tab-btn" data-tab="intune">Intune Provisioning</button>
+            <button class="tab-btn" data-tab="account">Resource Account Management</button>
         </nav>
 
-        <div class="tab-panels">
-            <div id="info" class="tab-panel active">
-                <div class="info-container">
-                    <h2>MTR Setup Information</h2>
-                    
-                    <div class="info-text">
-                        <p>This tool streamlines the process of provisioning Microsoft Teams Rooms (MTR) devices by automating device registration in both Intune and TAC systems. It helps you:</p>
-                        <ul class="tool-features">
-                            <li>Validate and format device information (UPN, Serial Number, MAC Address)</li>
-                            <li>Check account status and required group memberships</li>
-                            <li>Automate device registration in Intune using serial numbers</li>
-                            <li>Handle TAC provisioning with MAC addresses and daily code generation</li>
-                            <li>Manage different device types with their specific requirements</li>
-                        </ul>
-                        <p>The table below shows the requirements for each device type:</p>
+        <main>
+            <!-- Welcome Tab -->
+            <div class="tab-content active" id="welcome">
+                <div class="welcome-section">
+                    <h2>Welcome to MTR Setup Assistant</h2>
+                    <p>Choose one of the following options to get started:</p>
+                    <div class="steps">
+                        <div class="step">
+                            <h3>Intune Device Provisioning</h3>
+                            <p>Register and validate your Logitech device in Microsoft Intune. This process ensures your device is properly registered in your organization's device management system, enabling secure access and automated configuration. Simply enter the serial number, validate its format, and the system will handle the provisioning process.</p>
+                        </div>
+                        <div class="step">
+                            <h3>Resource Account Management</h3>
+                            <p>Create and configure Teams resource accounts with comprehensive management features. This includes automatic license assignment, group membership configuration, and proper display name formatting. The system will handle all necessary Azure AD configurations, ensuring your meeting room is properly set up with the correct permissions and access levels for seamless Teams integration.</p>
+                        </div>
                     </div>
-
-                    <div class="device-table-container">
-                        <table class="device-table">
-                            <thead>
-                                <tr>
-                                    <th>Requirements</th>
-                                    <th>Tap Scheduler Panel</th>
-                                    <th>Tap IP Panel</th>
-                                    <th>Tap Panel</th>
-                                    <th>Rallybar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="category-row">
-                                    <td colspan="5">Required Registrations</td>
-                                </tr>
-                                <tr>
-                                    <td>Intune Registration</td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>TAC Registration</td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="x-mark">✗</span></td>
-                                    <td><span class="check">✓</span></td>
-                                </tr>
-                                <tr class="category-row">
-                                    <td colspan="5">Required Groups</td>
-                                </tr>
-                                <tr>
-                                    <td>MTR-Resource-Accounts</td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                </tr>
-                                <tr>
-                                    <td>MTR-Teams-Panel-License-Microsoft Teams Shared Device</td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="check">✓</span></td>
-                                    <td><span class="x-mark">✗</span></td>
-                                </tr>
-                                <tr>
-                                    <td>MTR-Teams-Room-License-Teams Rooms Pro</td>
-                                    <td><span class="x-mark">✗</span></td>
-                                    <td><span class="x-mark">✗</span></td>
-                                    <td><span class="x-mark">✗</span></td>
-                                    <td><span class="check">✓</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="additional-info">
-                        <h3>Important Notes</h3>
-                        <ul>
-                            <li>Check that the UPN is correct in Excel. Old rooms often have @banenor.no (on-prem), new rooms have @banenor.onmicrosoft.com (cloud)</li>
-                            <li>On-Prem Accounts: Must be unlocked and password set in Active Directory. Use AD tools to manage these accounts.</li>
-                            <li>Cloud Accounts: Password and account management is done through the Microsoft 365 admin portal</li>
-                            <li>Serial numbers on Logitech devices must end with the number 2</li>
-                            <li>If the device is not a Rallybar or requires Teams Pro license, it should be added to the shared_device group instead of pro</li>
-                        </ul>
-                    </div>
-
-                    <div class="credit">
-                        <p>Created by Olav Heggelund, March 2025</p>
+                    <div class="welcome-buttons">
+                        <button class="start-btn" data-goto="intune">Start Device Setup</button>
+                        <button class="start-btn" data-goto="account">Create Resource Account</button>
                     </div>
                 </div>
             </div>
 
-            <div id="setup" class="tab-panel">
-                <form id="setupForm">
-                    <div class="form-group">
-                        <label for="deviceType">Device Type:</label>
-                        <select id="deviceType" required>
-                            <option value="">Select Device Type</option>
-                            <option value="tap-scheduler">Tap Scheduler Panel</option>
-                            <option value="tap-ip">Tap IP Panel</option>
-                            <option value="tap">Tap Panel</option>
-                            <option value="rallybar">Rallybar</option>
-                        </select>
-                        <small>Select the device type to determine setup requirements and required group memberships</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="upn">Resource Account (UPN):</label>
-                        <div class="input-with-button">
-                            <input type="text" id="upn" required>
-                            <button type="button" id="checkUpn" class="btn-check">Check</button>
-                        </div>
-                        <div class="upn-format">
-                            <span class="upn-format-item">Cloud accounts: <strong>room@banenor.onmicrosoft.com</strong></span>
-                            <span class="upn-format-item">On-Prem accounts: <strong>room@banenor.no</strong></span>
-                        </div>
-                    </div>
-
+            <!-- Intune Provisioning Tab -->
+            <div class="tab-content" id="intune">
+                <div class="form-section">
+                    <h2>Device Information</h2>
                     <div class="form-group">
                         <label for="serialNumber">Serial Number:</label>
-                        <div class="input-with-button">
-                            <input type="text" id="serialNumber" required>
-                            <button type="button" id="checkSerial" class="btn-check">Check</button>
+                        <input type="text" id="serialNumber" required>
+                        <div class="validation-message" id="serialValidation"></div>
+                        <div class="requirements-note">
+                            <span class="requirement-icon">ℹ️</span>
+                            <span class="requirement-text">Serial number must be exactly 12 characters long and end with '2'</span>
                         </div>
-                        <small>Must be 12 characters and end with 2</small>
                     </div>
+                </div>
 
+                <div id="deviceSetupSection" class="form-section hidden">
+                    <h2>Device Setup</h2>
                     <div class="form-group">
-                        <label for="macAddress">MAC Address:</label>
-                        <div class="input-with-button">
-                            <input type="text" id="macAddress" required>
-                            <button type="button" id="checkMac" class="btn-check">Check</button>
-                        </div>
-                        <small id="macAddressHint">Format: XX:XX:XX:XX:XX:XX (will be formatted automatically)</small>
-                        <small id="macAddressNotRequired" class="info-message" style="display: none;">MAC address is not required for Tap Panel devices</small>
+                        <label for="description">Device Description:</label>
+                        <input type="text" id="description" required>
+                        <small>Example: Logitech Device B260</small>
                     </div>
-
-                    <div class="status-section">
-                        <h3>Status</h3>
-                        <div class="status-indicators">
-                            <div id="accountStatus" class="status-indicator">
-                                <span class="label">Account:</span>
-                                <span class="value">Not checked</span>
-                            </div>
-                            <div id="intuneStatus" class="status-indicator">
-                                <span class="label">Intune:</span>
-                                <span class="value">Not checked</span>
-                            </div>
-                            <div id="tacStatus" class="status-indicator">
-                                <span class="label">TAC:</span>
-                                <span class="value">Not checked</span>
-                            </div>
-                            <div id="groupStatus" class="status-indicator">
-                                <span class="label">Groups:</span>
-                                <span class="value">Not checked</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="actions">
-                        <button type="button" id="provisionIntune" class="btn-provision" disabled>Provision in Intune</button>
-                        <button type="button" id="provisionTAC" class="btn-provision" disabled>Provision in TAC</button>
-                    </div>
-                </form>
-
-                <div id="status" class="status-container"></div>
+                    <button type="button" id="provisionIntuneBtn" class="provision-btn">Provision in Intune</button>
+                </div>
             </div>
 
-            <div id="codes" class="tab-panel">
-                <form id="codesForm" class="form-container">
-                    <div class="form-group">
-                        <h3>Provisioned, Unassigned Rooms</h3>
-                        <small>Select rooms to generate login codes for initial device setup</small>
-                        
-                        <div class="codes-controls">
-                            <button type="button" id="generateSelectedCodes" class="btn-generate" disabled>Generate Codes for Selected Devices</button>
-                            <button type="button" id="refreshRooms" class="btn-refresh">Refresh List</button>
+            <!-- Resource Account Tab -->
+            <div class="tab-content" id="account">
+                <form id="setupForm" class="setup-form">
+                    <div class="form-section">
+                        <h2>Account Information</h2>
+                        <div class="form-group">
+                            <label for="upn">User Principal Name (UPN):</label>
+                            <input type="email" id="upn" required>
+                            <small>Example: room01@banenor.no</small>
                         </div>
-                        
-                        <div class="room-list-container">
-                            <div id="unprovisionedList" class="room-list">
-                                <!-- Will be populated dynamically -->
-                            </div>
+                        <div class="form-group">
+                            <label for="displayName">Display Name:</label>
+                            <input type="text" id="displayName" required>
+                            <small>Example: Meeting Room 01</small>
                         </div>
-                        
-                        <div id="generatedCodes" class="generated-codes">
-                            <!-- Will be populated with generated codes -->
-                        </div>
+                        <button type="submit" class="submit-btn">Create Resource Account</button>
                     </div>
                 </form>
             </div>
+
+            <div id="results" class="results hidden">
+                <h2>Setup Results</h2>
+                <div class="result-section">
+                    <h3>Device Status</h3>
+                    <pre id="deviceStatus"></pre>
+                </div>
+                <div class="result-section">
+                    <h3>User Account Status</h3>
+                    <pre id="userStatus"></pre>
+                </div>
+                <div class="result-section">
+                    <h3>Group Memberships</h3>
+                    <pre id="groupStatus"></pre>
+                </div>
+                <button id="resetBtn" class="reset-btn">Setup Another Device</button>
+            </div>
+        </main>
+
+        <div id="loader" class="loader hidden">
+            <div class="spinner"></div>
+            <p>Setting up device...</p>
+        </div>
+
+        <div id="toast" class="toast hidden">
+            <span id="toastMessage"></span>
         </div>
     </div>
-
     <script src="index.js"></script>
 </body>
 </html> 
