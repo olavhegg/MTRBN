@@ -26,20 +26,35 @@
             <div class="tab-content active" id="welcome">
                 <div class="welcome-section">
                     <h2>Welcome to MTR Setup Assistant</h2>
-                    <p>Choose one of the following options to get started:</p>
+                    <p>Select one of the following options:</p>
                     <div class="steps">
                         <div class="step">
                             <h3>Intune Device Provisioning</h3>
-                            <p>Register and validate your Logitech device in Microsoft Intune. This process ensures your device is properly registered in your organization's device management system, enabling secure access and automated configuration. Simply enter the serial number, validate its format, and the system will handle the provisioning process.</p>
+                            <p>Register your Logitech MTR device with Microsoft Intune.</p>
+                            <ul class="feature-list">
+                                <li>Validate device serial numbers</li>
+                                <li>Check if device is already in Intune</li>
+                                <li>Register device in Intune if needed</li>
+                            </ul>
+                            <button class="start-btn feature-btn" data-goto="intune">Register New Device</button>
                         </div>
                         <div class="step">
                             <h3>Resource Account Management</h3>
-                            <p>Create and configure Teams resource accounts with comprehensive management features. This includes automatic license assignment, group membership configuration, and proper display name formatting. The system will handle all necessary Azure AD configurations, ensuring your meeting room is properly set up with the correct permissions and access levels for seamless Teams integration.</p>
+                            <p>Create and configure Microsoft Teams accounts for meeting rooms.</p>
+                            <ul class="feature-list">
+                                <li>Validate resource account existence and password</li>
+                                <li>Update account password</li>
+                                <li>Assign group memberships for licenses</li>
+                            </ul>
+                            <button class="start-btn feature-btn" data-goto="account">Set Up Resource Account</button>
                         </div>
                     </div>
-                    <div class="welcome-buttons">
-                        <button class="start-btn" data-goto="intune">Start Device Setup</button>
-                        <button class="start-btn" data-goto="account">Create Resource Account</button>
+                    
+                    <div class="app-footer">
+                        <div class="footer-content">
+                            <p>Created by Sopra Steria | Creator: Olav Heggelund | March 2025</p>
+                            <p class="license">© 2025 Bane NOR. All rights reserved.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -66,7 +81,7 @@
                         <input type="text" id="description" required>
                         <small>Example: Logitech Device B260</small>
                     </div>
-                    <button type="button" id="provisionIntuneBtn" class="provision-btn">Provision in Intune</button>
+                    <button type="button" id="provisionIntuneBtn" class="provision-btn">Register in Intune</button>
                 </div>
             </div>
 
@@ -85,7 +100,7 @@
                             <input type="text" id="displayName" required>
                             <small>Example: Meeting Room 01</small>
                         </div>
-                        <button type="submit" class="submit-btn">Create Resource Account</button>
+                        <button type="submit" class="submit-btn">Create Room Account</button>
                     </div>
                 </form>
             </div>
