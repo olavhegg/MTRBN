@@ -22,7 +22,10 @@ contextBridge.exposeInMainWorld(
                     'check-device-serial',
                     'provision-device',
                     'setup-device',
-                    'quit-app'
+                    'quit-app',
+                    'check-intune-device',
+                    'provision-intune',
+                    'create-resource-account'
                 ];
                 if (validChannels.includes(channel)) {
                     return ipcRenderer.invoke(channel, ...args);

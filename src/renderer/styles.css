@@ -748,34 +748,51 @@ button {
 
 .input-with-button {
     display: flex;
-    gap: 0.5rem;
-    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
 }
 
 .input-with-button input {
     flex: 1;
 }
 
-.btn-check {
-    padding: 0.75rem 1.5rem;
-    background-color: #1D2667;
+.check-btn {
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s ease;
-    white-space: nowrap;
+    font-weight: 500;
     min-width: 80px;
 }
 
-.btn-check:hover:not(:disabled) {
-    background-color: #2A357A;
-    transform: translateY(-1px);
+.check-btn:hover:not(:disabled) {
+    background-color: #2980b9;
 }
 
-.btn-check:disabled {
+.check-btn:disabled {
     background-color: #e9ecef;
     color: #adb5bd;
+    cursor: not-allowed;
+}
+
+.validation-message {
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-height: 20px;
+}
+
+.validation-message.error {
+    color: #dc3545;
+}
+
+.validation-message.success {
+    color: #28a745;
 }
 
 .info-message {
@@ -1304,7 +1321,7 @@ button {
 }
 
 .requirements-note {
-    margin-top: 0.5rem;
+    margin-bottom: 1rem;
     padding: 0.75rem;
     background-color: #fff3cd;
     border: 1px solid #ffeeba;
@@ -1312,6 +1329,7 @@ button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-align: left;
 }
 
 .requirement-icon {
@@ -1467,4 +1485,18 @@ button {
 .license {
     margin-top: 0.5rem;
     font-size: 0.8rem;
+}
+
+.centered-section {
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+    text-align: center;
+}
+
+.centered-section h2 {
+    margin-bottom: 1.5rem;
+}
+
+.centered-section .form-group {
+    text-align: left;
 } 

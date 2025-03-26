@@ -32,10 +32,15 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = __importStar(require("path"));
 require("dotenv/config");
+const graphService_1 = __importDefault(require("./services/graphService"));
+const logger_1 = require("./utils/logger");
 // Prevent multiple instances
 const gotTheLock = electron_1.app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -78,6 +83,86 @@ electron_1.app.on('second-instance', () => {
 // IPC Handlers
 electron_1.ipcMain.handle('quit-app', () => {
     electron_1.app.quit();
+});
+// Intune device handlers
+electron_1.ipcMain.handle('check-intune-device', async (_, serialNumber) => {
+    console.log(`[IPC] Called check-intune-device with serial: ${serialNumber}`);
+    try {
+        logger_1.logger.info(`Checking if device exists in Intune: ${serialNumber}`);
+        const graphService = graphService_1.default.getInstance();
+        // Validate the device serial number format
+        console.log('[IPC] Validating device serial format');
+        const validationResult = graphService.validateDevice(serialNumber);
+        console.log('[IPC] Validation result:', validationResult);
+        if (!validationResult.isValid) {
+            console.log('[IPC] Serial validation failed:', validationResult.validationMessage);
+            return {
+                success: false,
+                error: validationResult.validationMessage
+            };
+        }
+        // Check if device already exists in Intune
+        console.log('[IPC] Checking if device exists in Intune');
+        try {
+            const existingDevice = await graphService.checkDeviceSerial(serialNumber);
+            console.log('[IPC] Device check result:', existingDevice ? 'Found' : 'Not found');
+            return {
+                success: true,
+                exists: !!existingDevice,
+                device: existingDevice
+            };
+        }
+        catch (graphError) {
+            console.error('[IPC] Error from Graph API when checking device:', graphError);
+            return {
+                success: false,
+                error: `Graph API error: ${graphError.message || String(graphError)}`
+            };
+        }
+    }
+    catch (error) {
+        console.error('[IPC] Error checking Intune device:', error);
+        logger_1.logger.error('Error checking Intune device:', error);
+        return {
+            success: false,
+            error: `Failed to check device: ${error.message || String(error)}`
+        };
+    }
+});
+electron_1.ipcMain.handle('provision-intune', async (_, { serialNumber, description }) => {
+    try {
+        logger_1.logger.info(`Provisioning device in Intune: ${serialNumber}`);
+        const graphService = graphService_1.default.getInstance();
+        // Validate the device serial number format
+        const validationResult = graphService.validateDevice(serialNumber);
+        if (!validationResult.isValid) {
+            return {
+                success: false,
+                error: validationResult.validationMessage
+            };
+        }
+        // Check if device already exists
+        let deviceInfo = await graphService.checkDeviceSerial(serialNumber);
+        // If device doesn't exist, add it
+        if (!deviceInfo) {
+            deviceInfo = await graphService.addDeviceSerial(serialNumber, description);
+            logger_1.logger.info(`Device provisioned successfully: ${serialNumber}`);
+        }
+        else {
+            logger_1.logger.info(`Device already exists in Intune: ${serialNumber}`);
+        }
+        return {
+            success: true,
+            device: deviceInfo
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error provisioning Intune device:', error);
+        return {
+            success: false,
+            error: `Failed to provision device: ${error.message || String(error)}`
+        };
+    }
 });
 electron_1.app.whenReady().then(() => {
     createWindow();

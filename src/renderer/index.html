@@ -61,25 +61,28 @@
 
             <!-- Intune Provisioning Tab -->
             <div class="tab-content" id="intune">
-                <div class="form-section">
+                <div class="form-section centered-section">
                     <h2>Device Information</h2>
                     <div class="form-group">
-                        <label for="serialNumber">Serial Number:</label>
-                        <input type="text" id="serialNumber" required>
-                        <div class="validation-message" id="serialValidation"></div>
                         <div class="requirements-note">
                             <span class="requirement-icon">ℹ️</span>
                             <span class="requirement-text">Serial number must be exactly 12 characters long and end with '2'</span>
                         </div>
+                        <label for="serialNumber">Input Serial Number:</label>
+                        <div class="input-with-button">
+                            <input type="text" id="serialNumber" required placeholder="e.g., 123456789012">
+                            <button type="button" id="checkSerialBtn" class="check-btn" disabled>Check</button>
+                        </div>
+                        <div class="validation-message" id="serialValidation"></div>
                     </div>
                 </div>
 
-                <div id="deviceSetupSection" class="form-section hidden">
+                <div id="deviceSetupSection" class="form-section centered-section hidden">
                     <h2>Device Setup</h2>
                     <div class="form-group">
                         <label for="description">Device Description:</label>
-                        <input type="text" id="description" required>
-                        <small>Example: Logitech Device B260</small>
+                        <input type="text" id="description" required placeholder="Enter a description for this device">
+                        <small>Example: Logitech MTR Device B260 - Meeting Room 1</small>
                     </div>
                     <button type="button" id="provisionIntuneBtn" class="provision-btn">Register in Intune</button>
                 </div>
@@ -125,7 +128,7 @@
 
         <div id="loader" class="loader hidden">
             <div class="spinner"></div>
-            <p>Setting up device...</p>
+            <p id="loaderText">Checking device...</p>
         </div>
 
         <div id="toast" class="toast hidden">

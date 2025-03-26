@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const deviceSetupSection = document.getElementById('deviceSetupSection');
         const resetBtn = document.getElementById('resetBtn');
         const startButtons = document.querySelectorAll('.start-btn');
+        const checkSerialBtn = document.getElementById('checkSerialBtn');
 
         // Create a container for status messages if needed
         let statusContainer = document.querySelector('.status-container');
@@ -133,9 +134,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const value = input.value;
                 const validationElement = document.getElementById('serialValidation');
                 
-                if (value.length !== 12 || !value.endsWith('2')) {
+                // Enable or disable the check button based on validation
+                if (checkSerialBtn) {
+                    const isValid = value.length === 12 && value.endsWith('2');
+                    (checkSerialBtn as HTMLButtonElement).disabled = !isValid;
+                }
+                
+                if (value.length < 12) {
                     if (validationElement) {
-                        validationElement.textContent = 'Serial number must be exactly 12 characters long and end with "2"';
+                        validationElement.textContent = `Serial number too short: ${value.length}/12 characters`;
+                        validationElement.className = 'validation-message error';
+                    }
+                    if (deviceSetupSection) {
+                        deviceSetupSection.classList.add('hidden');
+                    }
+                } else if (value.length > 12) {
+                    if (validationElement) {
+                        validationElement.textContent = `Serial number too long: ${value.length}/12 characters`;
+                        validationElement.className = 'validation-message error';
+                    }
+                    if (deviceSetupSection) {
+                        deviceSetupSection.classList.add('hidden');
+                    }
+                } else if (!value.endsWith('2')) {
+                    if (validationElement) {
+                        validationElement.textContent = 'Serial number must end with "2"';
                         validationElement.className = 'validation-message error';
                     }
                     if (deviceSetupSection) {
@@ -143,27 +166,79 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else {
                     if (validationElement) {
-                        validationElement.textContent = 'Valid serial number';
+                        validationElement.textContent = 'Valid serial number format. Press Check to verify if the device is already provisioned in Intune.';
                         validationElement.className = 'validation-message success';
                     }
-                    if (deviceSetupSection) {
-                        deviceSetupSection.classList.remove('hidden');
+                }
+            });
+
+            // Remove the blur event and handle serial check with the button click
+            if (checkSerialBtn) {
+                checkSerialBtn.addEventListener('click', async () => {
+                    const serialNumber = (serialNumberInput as HTMLInputElement).value;
+                    if (!serialNumber || serialNumber.length !== 12 || !serialNumber.endsWith('2')) return;
+                    
+                    console.log('Check button clicked for serial:', serialNumber);
+                    showLoader();
+                    const validationElement = document.getElementById('serialValidation');
+                    
+                    try {
+                        console.log('Sending check-intune-device request...');
+                        // Check if device exists in Intune
+                        const result = await ipcRenderer.invoke('check-intune-device', serialNumber);
+                        console.log('Received check-intune-device response:', result);
+                        hideLoader();
+                        
+                        if (result && result.success) {
+                            if (result.exists) {
+                                // Show a message that the device already exists
+                                console.log('Device exists in Intune:', result.device);
+                                if (validationElement) {
+                                    validationElement.textContent = `Device ${serialNumber} is already provisioned in Intune with description: ${result.device.description}`;
+                                    validationElement.className = 'validation-message success';
+                                }
+                                showToast(`Device ${serialNumber} is already provisioned in Intune`, false);
+                                
+                                // Don't show device setup section if already provisioned
+                                if (deviceSetupSection) {
+                                    deviceSetupSection.classList.add('hidden');
+                                }
+                            } else {
+                                // Device is valid but not registered yet
+                                console.log('Device not registered in Intune');
+                                if (validationElement) {
+                                    validationElement.textContent = 'Device not registered. Please provide a description to register it.';
+                                    validationElement.className = 'validation-message success';
+                                }
+                                
+                                // Show the device setup section
+                                if (deviceSetupSection) {
+                                    deviceSetupSection.classList.remove('hidden');
+                                    // Set focus on description field
+                                    if (deviceDescription) {
+                                        (deviceDescription as HTMLInputElement).focus();
+                                    }
+                                }
+                            }
+                        } else {
+                            console.error('Error result from check-intune-device:', result);
+                            if (validationElement) {
+                                validationElement.textContent = result?.error || 'Error checking device status. Please try again.';
+                                validationElement.className = 'validation-message error';
+                            }
+                            showToast(result?.error || 'Error checking device status', true);
+                        }
+                    } catch (error) {
+                        console.error('Exception checking Intune device:', error);
+                        hideLoader();
+                        if (validationElement) {
+                            validationElement.textContent = 'Error checking device. Please try again or contact support.';
+                            validationElement.className = 'validation-message error';
+                        }
+                        showToast(`Error checking device: ${error instanceof Error ? error.message : String(error)}`, true);
                     }
-                }
-            });
-
-            serialNumberInput.addEventListener('blur', async () => {
-                const serialNumber = (serialNumberInput as HTMLInputElement).value;
-                if (!serialNumber || serialNumber.length !== 12 || !serialNumber.endsWith('2')) return;
-
-                try {
-                    // Optionally check if device exists in Intune
-                    // const result = await ipcRenderer.invoke('check-intune-device', serialNumber);
-                    // Handle result...
-                } catch (error) {
-                    console.error('Error checking Intune device:', error);
-                }
-            });
+                });
+            }
         }
 
         // Setup Intune provisioning button
@@ -180,6 +255,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 showLoader();
                 
                 try {
+                    // First check if device already exists
+                    const checkResult = await ipcRenderer.invoke('check-intune-device', serialNumber);
+                    
+                    // If device exists and is valid, show message and don't try to provision again
+                    if (checkResult.success && checkResult.exists) {
+                        hideLoader();
+                        showToast(`Device ${serialNumber} is already provisioned in Intune`, false);
+                        
+                        // Update results with existing device info
+                        showResults({
+                            success: true,
+                            device: checkResult.device,
+                            user: null,
+                            groups: [],
+                            errors: []
+                        });
+                        return;
+                    }
+                    
+                    // Change loader text for provisioning
+                    const loaderText = document.getElementById('loaderText');
+                    if (loaderText) loaderText.textContent = 'Provisioning device in Intune...';
+                    
+                    // Proceed with provisioning if device doesn't exist
                     const result = await ipcRenderer.invoke('provision-intune', {
                         serialNumber,
                         description
@@ -188,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     hideLoader();
                     
                     if (result.success) {
+                        showToast(`Device ${serialNumber} successfully registered in Intune`, false);
                         showResults({
                             success: true,
                             device: result.device,
@@ -200,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } catch (error) {
                     hideLoader();
-                    showToast('Error provisioning device: ' + error, true);
+                    showToast('Error provisioning device: ' + (error instanceof Error ? error.message : String(error)), true);
                 }
             });
         }
@@ -219,6 +319,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 showLoader();
+                
+                // Set appropriate loader text
+                const loaderText = document.getElementById('loaderText');
+                if (loaderText) loaderText.textContent = 'Creating resource account...';
                 
                 try {
                     const password = generateRandomPassword();
@@ -268,7 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function showLoader() {
     const loader = document.getElementById('loader');
+    const loaderText = document.getElementById('loaderText');
     if (loader) loader.classList.remove('hidden');
+    if (loaderText) loaderText.textContent = 'Checking device...';
 }
 
 function hideLoader() {
@@ -330,11 +436,13 @@ function resetForm() {
     const upnInput = document.getElementById('upn') as HTMLInputElement;
     const displayNameInput = document.getElementById('displayName') as HTMLInputElement;
     const descriptionInput = document.getElementById('description') as HTMLInputElement;
+    const checkSerialBtn = document.getElementById('checkSerialBtn') as HTMLButtonElement;
     
     if (serialNumberInput) serialNumberInput.value = '';
     if (upnInput) upnInput.value = '';
     if (displayNameInput) displayNameInput.value = '';
     if (descriptionInput) descriptionInput.value = '';
+    if (checkSerialBtn) checkSerialBtn.disabled = true;
     
     // Hide results section
     const resultsSection = document.getElementById('results');
