@@ -1373,6 +1373,8 @@ button {
 .tab-content {
     display: none;
     animation: fadeIn 0.3s ease-in-out;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .tab-content.active {
@@ -1381,7 +1383,7 @@ button {
 
 /* Welcome Screen */
 .welcome-section {
-    padding: 1rem 2rem 2rem;
+    padding: 1rem 2rem 1rem;
     text-align: center;
 }
 
@@ -1473,6 +1475,19 @@ button {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+.static-footer {
+    background: linear-gradient(to right, var(--primary-color), #0747A6);
+    color: white;
+    margin-top: 0;
+    padding: 0.75rem 2rem;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.static-footer .license {
+    color: rgba(255, 255, 255, 0.8);
+}
+
 .footer-content {
     max-width: 800px;
     margin: 0 auto;
@@ -1485,7 +1500,7 @@ button {
 
 .centered-section {
     max-width: 600px;
-    margin: 0 auto 2rem auto;
+    margin: 0 auto 1rem auto;
     padding: 0 1.5rem;
 }
 
@@ -1508,7 +1523,7 @@ button {
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
     max-width: 600px; 
-    margin: 2rem auto;
+    margin: 1rem auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -1537,4 +1552,9 @@ button {
     margin: 1rem auto 0;
     width: 100%;
     max-width: 300px;
+}
+
+main {
+    padding-bottom: 30px; /* Reduced from 80px */
+    min-height: calc(100vh - 250px); /* Adjusted for better fit */
 } 
