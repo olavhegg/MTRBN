@@ -1,85 +1,126 @@
-# Microsoft Graph API - Intune Device Management
+# MTR Resource Account Management
 
-This repository contains tools for testing and managing devices in Microsoft Intune through the Microsoft Graph API.
+A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) resource accounts and provision devices in Microsoft Intune.
 
-## Key Findings
+## Features
 
-After extensive testing, we discovered that:
+- **Account Management**:
+  - Check and validate resource account existence
+  - Update display names for existing resource accounts
+  - Verify password status and reset passwords
+  
+- **Group & License Management**:
+  - Manage MTR resource account group membership (`MTR-Resource Accounts`)
+  - Add/remove accounts from Teams Room license groups:
+    - Teams Shared Devices (`MTR-Teams-Panel-License-Microsoft Teams Shared Devices`)
+    - Teams Rooms Pro (`MTR-Teams-Room-License-Teams Rooms Pro`)
+  
+- **Account Status**:
+  - Check if accounts are unlocked
+  - Verify membership in required groups
 
-1. The most reliable way to add devices to Intune is through the Windows Autopilot API
-2. The endpoint `/deviceManagement/importedWindowsAutopilotDeviceIdentities` works for importing device identities
-3. This requires using the beta Graph API (`https://graph.microsoft.com/beta/...`)
-4. Using direct HTTP calls with axios provides more consistent results than the Graph Client library for this specific endpoint
+- **Intune Device Management**:
+  - Check if a device exists in Intune using its serial number
+  - Provision new devices in Intune for Microsoft Teams Rooms
+  - Support for various device types including Android-based MTR devices
+  - Validate device serial numbers before provisioning
 
-## Required Permissions
+## Prerequisites
 
-For these tools to work properly, your app registration needs:
+- Node.js 16+
+- npm
+- Microsoft Azure AD tenant with appropriate permissions
+- App registration in Azure AD with the following permissions:
+  - User.ReadWrite.All
+  - Group.ReadWrite.All
+  - Directory.ReadWrite.All
+  - DeviceManagementServiceConfig.ReadWrite.All
+  - DeviceManagementConfiguration.ReadWrite.All
+  - DeviceManagementManagedDevices.ReadWrite.All
 
-- DeviceManagementServiceConfig.ReadWrite.All 
-- DeviceManagementConfiguration.ReadWrite.All
-- DeviceManagementManagedDevices.ReadWrite.All
-- Group.ReadWrite.All (for creating groups)
+## Setup
 
-## Tools Available
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd mtr-provisioning-app
+   ```
 
-### 1. Import a Device
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-Adds a new device to Intune using the Windows Autopilot API:
+3. Create an `.env` file in the project root with your Azure AD credentials:
+   ```
+   TENANT_ID=your_tenant_id
+   CLIENT_ID=your_client_id
+   CLIENT_SECRET=your_client_secret
+   RESOURCE_PASSWORD=your_default_resource_account_password
+   MTR_GROUP_ID=your_mtr_resource_accounts_group_id
+   ROOM_GROUP_ID=your_teams_room_license_group_id
+   PRO_GROUP_ID=your_teams_rooms_pro_license_group_id
+   
+
+
+4. Build the application:
+   ```
+   npm run build
+   ```
+
+5. Start the application:
+   ```
+   npm start
+   ```
+
+## Development
+
+- Run in development mode with hot reloading:
+  ```
+  npm run dev
+  ```
+
+- Clean build artifacts:
+  ```
+  npm run clean
+  ```
+
+## Usage
+
+1. **Resource Account Management**:
+   - Enter a UPN (username@domain) to search for an existing account
+   - Update display name for existing accounts
+   - Reset passwords to a standard password when needed
+
+2. **Account Status**:
+   - Check if the account password matches the standard password
+   - Verify if the account is unlocked
+   - Check if the account is a member of the MTR Resource Accounts group
+
+3. **License Management**:
+   - Add or remove the account from Teams Shared Devices license group
+   - Add or remove the account from Teams Rooms Pro license group
+
+4. **Intune Device Provisioning**:
+   - Enter a device serial number to check if it's already registered in Intune
+   - Validate the serial number format before provisioning
+   - Add new devices to Intune with proper description and configuration
+   - Suitable for Microsoft Teams Rooms devices including Android-based systems
+
+## Building for Production
+
+To build the application for production:
 
 ```
-node src/import-device.js <serialNumber> <groupTag>
+npm run build
 ```
 
-Example:
-```
-node src/import-device.js 555-ABCDE-12345 MTR-Room
-```
-
-### 2. List All Devices
-
-Shows all imported Windows Autopilot device identities:
+For Windows installers, you can use electron-builder:
 
 ```
-node src/list-devices.js
+npx electron-builder --win
 ```
 
-### 3. Test Connection and API Status
+## License
 
-Tests connection to various Microsoft Graph API endpoints to verify permissions:
-
-```
-node src/test-connection.js
-```
-
-### 4. Test Intune-Specific Endpoints
-
-Tests various Intune-specific endpoints to check permissions and functionality:
-
-```
-node src/test-intune-endpoints.js
-```
-
-### 5. Test Managed Devices
-
-Tests managed device endpoints specifically:
-
-```
-node src/test-managed-devices.js
-```
-
-### 6. Test Device Enrollment
-
-Tests the device enrollment profiles and categories:
-
-```
-node src/test-device-enrollment.js
-```
-
-## Troubleshooting
-
-If you encounter errors:
-
-1. Check that your app has all the necessary permissions listed above
-2. Verify that admin consent has been granted for all permissions
-3. Ensure your .env file contains the correct TENANT_ID, CLIENT_ID, and CLIENT_SECRET
-4. Remember that some operations might take time to propagate through the Microsoft Graph API 
+ISC

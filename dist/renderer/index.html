@@ -124,7 +124,7 @@
                             <div id="updateSuccessMessage" class="permanent-success-message hidden"></div>
                         </div>
                         
-                        <!-- Password Status Section -->
+                        <!-- Account Status Section -->
                         <div id="accountPasswordSection" class="account-section hidden">
                             <h3>Account Status</h3>
                             <div class="status-indicator">
@@ -139,38 +139,59 @@
                                 <span class="status-label">Account Unlocked:</span>
                                 <div id="accountLockedIndicator" class="indicator small"></div>
                             </div>
-                            <div class="status-item">
-                                <span class="status-label">MTR Resource Accounts Group:</span>
-                                <div id="resourceGroupIndicator" class="indicator small"></div>
+                            <div class="status-item license-item">
+                                <div class="license-status">
+                                    <div id="resourceGroupIndicator" class="indicator small"></div>
+                                    <span>MTR-Resource Accounts</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button id="addToMtrStatusBtn" class="small-action-btn">Add</button>
+                                    <button id="removeFromMtrStatusBtn" class="small-action-btn">Remove</button>
+                                </div>
                             </div>
+                            <div class="license-note">Required for Teams Rooms Pro license. Controls whether this account has MTR functionality.</div>
                         </div>
                         
                         <!-- License Management Section -->
                         <div id="licensesSection" class="account-section hidden">
-                            <h3>Group Memberships</h3>
-                            <p>Account group memberships determine what licenses and features are available.</p>
+                            <h3>License Group Memberships</h3>
+                            <p>Group memberships determine what Microsoft Teams licenses and features are available to this account.</p>
                             
                             <div class="license-item">
                                 <div class="license-status">
                                     <div id="mtrGroupIndicator" class="indicator small"></div>
-                                    <span>MTR Resource Accounts</span>
+                                    <span>MTR-Resource Accounts</span>
                                 </div>
                                 <div class="license-actions">
                                     <button id="addToMtrBtn" class="small-action-btn">Add</button>
                                     <button id="removeFromMtrBtn" class="small-action-btn">Remove</button>
                                 </div>
                             </div>
+                            <div class="license-note">Required for Microsoft Teams Rooms Pro license. Provides full MTR functionality including advanced management features.</div>
                             
                             <div class="license-item">
                                 <div class="license-status">
                                     <div id="roomGroupIndicator" class="indicator small"></div>
-                                    <span>Room Accounts</span>
+                                    <span>MTR-Teams-Panel-License-Microsoft Teams Shared Devices</span>
                                 </div>
                                 <div class="license-actions">
                                     <button id="addToRoomBtn" class="small-action-btn">Add</button>
                                     <button id="removeFromRoomBtn" class="small-action-btn">Remove</button>
                                 </div>
                             </div>
+                            <div class="license-note">Required for Teams Shared Devices license. Provides basic room functionality without advanced management features.</div>
+                            
+                            <div class="license-item">
+                                <div class="license-status">
+                                    <div id="proGroupIndicator" class="indicator small"></div>
+                                    <span>MTR-Teams-Room-License-Teams Rooms Pro</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button id="addToProBtn" class="small-action-btn">Add</button>
+                                    <button id="removeFromProBtn" class="small-action-btn">Remove</button>
+                                </div>
+                            </div>
+                            <div class="license-note">Required for Teams Rooms Pro license. Provides advanced room functionality and management capabilities.</div>
                             
                             <div id="licenseSuccessMessage" class="action-success-message hidden"></div>
                         </div>

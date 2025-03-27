@@ -648,6 +648,32 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Add to Pro Group button
+        const addToProBtn = document.getElementById('addToProBtn');
+        if (addToProBtn && upnInput) {
+            addToProBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                addToProGroup(upn);
+            });
+        }
+        
+        // Remove from Pro Group button
+        const removeFromProBtn = document.getElementById('removeFromProBtn');
+        if (removeFromProBtn && upnInput) {
+            removeFromProBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                removeFromProGroup(upn);
+            });
+        }
+
         // Quit button functionality
         if (quitButton) {
             quitButton.addEventListener('click', () => {
@@ -925,6 +951,9 @@ async function checkGroupMemberships(upn: string) {
     
     // Check Room group membership
     await checkRoomGroupMembership(upn);
+    
+    // Check Pro license group membership
+    await checkProGroupMembership(upn);
 }
 
 // Function to check MTR group membership
@@ -1080,6 +1109,46 @@ async function checkRoomGroupMembership(upn: string) {
         addToRoomBtn.disabled = true;
         removeFromRoomBtn.disabled = true;
         showToast('Error checking Room group membership: ' + (error as Error).message, true);
+    }
+}
+
+// Function to check Pro license group membership
+async function checkProGroupMembership(upn: string) {
+    const proGroupIndicator = document.getElementById('proGroupIndicator');
+    const addToProBtn = document.getElementById('addToProBtn') as HTMLButtonElement;
+    const removeFromProBtn = document.getElementById('removeFromProBtn') as HTMLButtonElement;
+    
+    if (!proGroupIndicator || !addToProBtn || !removeFromProBtn) return;
+    
+    try {
+        // Set to loading state
+        proGroupIndicator.className = 'indicator small';
+        addToProBtn.disabled = true;
+        removeFromProBtn.disabled = true;
+        
+        const result = await ipcRenderer.invoke('check-pro-membership', upn);
+        
+        if (result.success) {
+            if (result.isMember) {
+                proGroupIndicator.className = 'indicator small success';
+                addToProBtn.disabled = true;
+                removeFromProBtn.disabled = false;
+            } else {
+                proGroupIndicator.className = 'indicator small error';
+                addToProBtn.disabled = false;
+                removeFromProBtn.disabled = true;
+            }
+        } else {
+            proGroupIndicator.className = 'indicator small error';
+            addToProBtn.disabled = true;
+            removeFromProBtn.disabled = true;
+            showToast(result.error || 'Failed to check Pro license group membership', true);
+        }
+    } catch (error) {
+        proGroupIndicator.className = 'indicator small error';
+        addToProBtn.disabled = true;
+        removeFromProBtn.disabled = true;
+        showToast('Error checking Pro license group membership: ' + (error as Error).message, true);
     }
 }
 
@@ -1244,5 +1313,87 @@ async function removeFromRoomGroup(upn: string) {
         removeFromRoomBtn.disabled = false;
         removeFromRoomBtn.textContent = 'Remove';
         showToast('Error removing from Room group: ' + (error as Error).message, true);
+    }
+}
+
+// Function to add user to Pro license group
+async function addToProGroup(upn: string) {
+    const addToProBtn = document.getElementById('addToProBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    
+    if (!addToProBtn || !licenseSuccessMessage) return;
+    
+    try {
+        // Disable button and show loading state
+        addToProBtn.disabled = true;
+        addToProBtn.textContent = 'Adding...';
+        
+        const result = await ipcRenderer.invoke('add-to-pro-group', upn);
+        
+        // Reset button state
+        addToProBtn.textContent = 'Add';
+        
+        if (result.success) {
+            licenseSuccessMessage.textContent = result.message;
+            licenseSuccessMessage.classList.remove('hidden');
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                licenseSuccessMessage.classList.add('hidden');
+            }, 5000);
+            
+            // Refresh membership status
+            checkProGroupMembership(upn);
+            
+            showToast('Added to Teams Rooms Pro license group', false);
+        } else {
+            addToProBtn.disabled = false;
+            showToast(result.error || 'Failed to add to Pro license group', true);
+        }
+    } catch (error) {
+        addToProBtn.disabled = false;
+        addToProBtn.textContent = 'Add';
+        showToast('Error adding to Pro license group: ' + (error as Error).message, true);
+    }
+}
+
+// Function to remove user from Pro license group
+async function removeFromProGroup(upn: string) {
+    const removeFromProBtn = document.getElementById('removeFromProBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    
+    if (!removeFromProBtn || !licenseSuccessMessage) return;
+    
+    try {
+        // Disable button and show loading state
+        removeFromProBtn.disabled = true;
+        removeFromProBtn.textContent = 'Removing...';
+        
+        const result = await ipcRenderer.invoke('remove-from-pro-group', upn);
+        
+        // Reset button state
+        removeFromProBtn.textContent = 'Remove';
+        
+        if (result.success) {
+            licenseSuccessMessage.textContent = result.message;
+            licenseSuccessMessage.classList.remove('hidden');
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                licenseSuccessMessage.classList.add('hidden');
+            }, 5000);
+            
+            // Refresh membership status
+            checkProGroupMembership(upn);
+            
+            showToast('Removed from Teams Rooms Pro license group', false);
+        } else {
+            removeFromProBtn.disabled = false;
+            showToast(result.error || 'Failed to remove from Pro license group', true);
+        }
+    } catch (error) {
+        removeFromProBtn.disabled = false;
+        removeFromProBtn.textContent = 'Remove';
+        showToast('Error removing from Pro license group: ' + (error as Error).message, true);
     }
 } 

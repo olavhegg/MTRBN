@@ -625,6 +625,115 @@ electron_1.ipcMain.handle('remove-from-room-group', async (_, upn) => {
         };
     }
 });
+// Handler for checking Pro license group membership
+electron_1.ipcMain.handle('check-pro-membership', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Checking Pro license group membership for: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.checkProGroupMembership(upn);
+        return {
+            success: true,
+            isMember: result.isMember,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error checking Pro license group membership:', error);
+        return {
+            success: false,
+            error: `Failed to check Pro license group membership: ${error.message}`
+        };
+    }
+});
+// Handler for adding user to Pro license group
+electron_1.ipcMain.handle('add-to-pro-group', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Adding user to Pro license group: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.addUserToProGroup(upn);
+        return {
+            success: result.success,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error adding user to Pro license group:', error);
+        return {
+            success: false,
+            error: `Failed to add to Pro license group: ${error.message}`
+        };
+    }
+});
+// Handler for removing user from Pro license group
+electron_1.ipcMain.handle('remove-from-pro-group', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Removing user from Pro license group: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.removeUserFromProGroup(upn);
+        return {
+            success: result.success,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error removing user from Pro license group:', error);
+        return {
+            success: false,
+            error: `Failed to remove from Pro license group: ${error.message}`
+        };
+    }
+});
 electron_1.app.whenReady().then(() => {
     createWindow();
     electron_1.app.on('activate', () => {

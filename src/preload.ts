@@ -36,7 +36,10 @@ contextBridge.exposeInMainWorld(
                     'add-to-mtr-group',
                     'remove-from-mtr-group',
                     'add-to-room-group',
-                    'remove-from-room-group'
+                    'remove-from-room-group',
+                    'check-pro-membership',
+                    'add-to-pro-group',
+                    'remove-from-pro-group'
                 ];
                 if (validChannels.includes(channel)) {
                     return ipcRenderer.invoke(channel, ...args);

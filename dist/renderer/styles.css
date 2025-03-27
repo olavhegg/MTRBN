@@ -1771,6 +1771,7 @@ main {
     padding: 0.5rem;
     border: 1px solid rgba(0,0,0,0.1);
     border-radius: 5px;
+    position: relative;
 }
 
 .license-status {
@@ -1801,4 +1802,12 @@ main {
 .small-action-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.license-note {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+    font-style: italic;
+    padding-left: 0.5rem;
 } 

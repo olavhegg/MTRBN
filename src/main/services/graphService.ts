@@ -956,6 +956,240 @@ class GraphService {
             };
         }
     }
+
+    /**
+     * Checks if user is a member of the Teams Rooms Pro license group
+     */
+    public async checkProGroupMembership(upn: string): Promise<{ isMember: boolean; message: string }> {
+        try {
+            logger.info(`Checking Teams Rooms Pro license group membership for: ${upn}`);
+            const client = await this.getClient();
+            
+            // First get the user ID
+            const user = await client.api(`/users/${upn}`)
+                .select('id')
+                .get();
+            
+            if (!user) {
+                return {
+                    isMember: false,
+                    message: "Account not found"
+                };
+            }
+            
+            // Get Pro license group ID
+            const groupName = 'MTR-Teams-Room-License-Teams Rooms Pro';
+            let groupId = process.env.PRO_GROUP_ID;
+            
+            if (!groupId) {
+                // Attempt to find the group by name
+                try {
+                    const groups = await client.api('/groups')
+                        .filter(`displayName eq '${groupName}'`)
+                        .get();
+                    
+                    if (groups && groups.value && groups.value.length > 0) {
+                        groupId = groups.value[0].id;
+                    } else {
+                        return {
+                            isMember: false,
+                            message: `${groupName} group not found`
+                        };
+                    }
+                } catch (error) {
+                    logger.error('Error finding Pro license group:', error);
+                    return {
+                        isMember: false,
+                        message: `Error finding ${groupName} group`
+                    };
+                }
+            }
+            
+            // Check if user is a member of the group
+            try {
+                const isMember = await client.api(`/groups/${groupId}/members`)
+                    .filter(`id eq '${user.id}'`)
+                    .count(true)
+                    .get();
+                
+                const count = isMember["@odata.count"];
+                
+                if (count > 0) {
+                    return {
+                        isMember: true,
+                        message: `Member of ${groupName}`
+                    };
+                } else {
+                    return {
+                        isMember: false,
+                        message: `Not a member of ${groupName}`
+                    };
+                }
+            } catch (error) {
+                logger.error('Error checking Pro license group membership:', error);
+                return {
+                    isMember: false,
+                    message: `Error checking ${groupName} membership`
+                };
+            }
+        } catch (error) {
+            logger.error('Error in overall Pro license group membership check:', error);
+            return {
+                isMember: false,
+                message: `Error: ${(error as Error).message}`
+            };
+        }
+    }
+
+    /**
+     * Adds a user to the Teams Rooms Pro license group
+     */
+    public async addUserToProGroup(upn: string): Promise<{ success: boolean; message: string }> {
+        try {
+            logger.info(`Adding user ${upn} to Teams Rooms Pro license group`);
+            const client = await this.getClient();
+            
+            // Get user ID
+            const user = await client.api(`/users/${upn}`)
+                .select('id')
+                .get();
+            
+            if (!user || !user.id) {
+                return {
+                    success: false,
+                    message: "Account not found"
+                };
+            }
+            
+            // Get Pro license group ID
+            const groupName = 'MTR-Teams-Room-License-Teams Rooms Pro';
+            let groupId = process.env.PRO_GROUP_ID;
+            
+            if (!groupId) {
+                // Attempt to find the group by name
+                try {
+                    const groups = await client.api('/groups')
+                        .filter(`displayName eq '${groupName}'`)
+                        .get();
+                    
+                    if (groups && groups.value && groups.value.length > 0) {
+                        groupId = groups.value[0].id;
+                    } else {
+                        return {
+                            success: false,
+                            message: `${groupName} group not found`
+                        };
+                    }
+                } catch (error) {
+                    logger.error('Error finding Pro license group:', error);
+                    return {
+                        success: false,
+                        message: `Error finding ${groupName} group`
+                    };
+                }
+            }
+            
+            // Check if already a member
+            const membershipCheck = await this.checkProGroupMembership(upn);
+            if (membershipCheck.isMember) {
+                return {
+                    success: true,
+                    message: `User is already a member of ${groupName}`
+                };
+            }
+            
+            // Add user to group
+            await client.api(`/groups/${groupId}/members/$ref`)
+                .post({
+                    "@odata.id": `https://graph.microsoft.com/v1.0/directoryObjects/${user.id}`
+                });
+            
+            return {
+                success: true,
+                message: `User added to ${groupName} successfully`
+            };
+        } catch (error) {
+            logger.error('Error adding user to Pro license group:', error);
+            return {
+                success: false,
+                message: `Error: ${(error as Error).message}`
+            };
+        }
+    }
+
+    /**
+     * Removes a user from the Teams Rooms Pro license group
+     */
+    public async removeUserFromProGroup(upn: string): Promise<{ success: boolean; message: string }> {
+        try {
+            logger.info(`Removing user ${upn} from Teams Rooms Pro license group`);
+            const client = await this.getClient();
+            
+            // Get user ID
+            const user = await client.api(`/users/${upn}`)
+                .select('id')
+                .get();
+            
+            if (!user || !user.id) {
+                return {
+                    success: false,
+                    message: "Account not found"
+                };
+            }
+            
+            // Get Pro license group ID
+            const groupName = 'MTR-Teams-Room-License-Teams Rooms Pro';
+            let groupId = process.env.PRO_GROUP_ID;
+            
+            if (!groupId) {
+                // Attempt to find the group by name
+                try {
+                    const groups = await client.api('/groups')
+                        .filter(`displayName eq '${groupName}'`)
+                        .get();
+                    
+                    if (groups && groups.value && groups.value.length > 0) {
+                        groupId = groups.value[0].id;
+                    } else {
+                        return {
+                            success: false,
+                            message: `${groupName} group not found`
+                        };
+                    }
+                } catch (error) {
+                    logger.error('Error finding Pro license group:', error);
+                    return {
+                        success: false,
+                        message: `Error finding ${groupName} group`
+                    };
+                }
+            }
+            
+            // Check if actually a member
+            const membershipCheck = await this.checkProGroupMembership(upn);
+            if (!membershipCheck.isMember) {
+                return {
+                    success: true,
+                    message: `User is not a member of ${groupName}`
+                };
+            }
+            
+            // Remove user from group
+            await client.api(`/groups/${groupId}/members/${user.id}/$ref`)
+                .delete();
+            
+            return {
+                success: true,
+                message: `User removed from ${groupName} successfully`
+            };
+        } catch (error) {
+            logger.error('Error removing user from Pro license group:', error);
+            return {
+                success: false,
+                message: `Error: ${(error as Error).message}`
+            };
+        }
+    }
 }
 
 export default GraphService; 
