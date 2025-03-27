@@ -25,7 +25,8 @@ contextBridge.exposeInMainWorld(
                     'quit-app',
                     'check-intune-device',
                     'provision-intune',
-                    'create-resource-account'
+                    'create-resource-account',
+                    'check-resource-account'
                 ];
                 if (validChannels.includes(channel)) {
                     return ipcRenderer.invoke(channel, ...args);

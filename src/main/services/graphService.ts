@@ -265,16 +265,10 @@ class GraphService {
     public async checkUser(upn: string): Promise<any> {
         try {
             const client = await this.getClient();
-            try {
-                return await client.api(`https://graph.microsoft.com/beta/users/${upn}`).get();
-            } catch (error) {
-                // If not found with primary domain, try onmicrosoft.com domain
-                const onmicrosoftUpn = upn.replace('@banenor.no', '@banenor.onmicrosoft.com');
-                return await client.api(`https://graph.microsoft.com/beta/users/${onmicrosoftUpn}`).get();
-            }
+            return await client.api(`https://graph.microsoft.com/beta/users/${upn}`).get();
         } catch (error) {
             logger.error('Error checking user:', error);
-            return null;
+            throw error;
         }
     }
 

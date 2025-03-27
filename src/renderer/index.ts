@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const upnInput = document.getElementById('upn');
         const displayNameInput = document.getElementById('displayName');
         const provisionIntuneBtn = document.getElementById('provisionIntuneBtn');
-        const createResourceAccountBtn = document.querySelector('.submit-btn');
         const quitButton = document.getElementById('quitButton');
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
@@ -74,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const startButtons = document.querySelectorAll('.start-btn');
         const checkSerialBtn = document.getElementById('checkSerialBtn');
         const provisionSerialNumberInput = document.getElementById('provisionSerialNumber');
+        // New elements for resource account tab
+        const checkUpnBtn = document.getElementById('checkUpnBtn');
+        const upnValidation = document.getElementById('upnValidation');
+        const resetAccountBtn = document.getElementById('resetAccountBtn');
 
         // Create a container for status messages if needed
         let statusContainer = document.querySelector('.status-container');
@@ -322,50 +325,110 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Setup Resource Account creation
-        if (createResourceAccountBtn && upnInput && displayNameInput) {
-            createResourceAccountBtn.addEventListener('click', async (event) => {
-                event.preventDefault();
+        // UPN input validation
+        if (upnInput) {
+            upnInput.addEventListener('input', (event) => {
+                const input = event.target as HTMLInputElement;
+                const value = input.value.trim();
                 
-                const upn = (upnInput as HTMLInputElement).value;
-                const displayName = (displayNameInput as HTMLInputElement).value;
-                
-                if (!upn || !displayName) {
-                    showToast('Please fill in all required fields', true);
-                    return;
+                // Enable or disable the check button based on validation
+                if (checkUpnBtn) {
+                    const isValid = value.includes('@') && value.length > 5;
+                    (checkUpnBtn as HTMLButtonElement).disabled = !isValid;
                 }
-
-                showLoader();
                 
-                // Set appropriate loader text
-                const loaderText = document.getElementById('loaderText');
-                if (loaderText) loaderText.textContent = 'Creating resource account...';
-                
-                try {
-                    const password = generateRandomPassword();
-                    const result = await ipcRenderer.invoke('create-resource-account', {
-                        upn,
-                        displayName,
-                        password
-                    });
-                    
-                    hideLoader();
-                    
-                    if (result.success) {
-                        showToast(`Resource account ${upn} successfully created`, false);
-                    } else {
-                        showToast(result.error || 'Failed to create resource account', true);
-                    }
-                } catch (error) {
-                    hideLoader();
-                    showToast('Error creating resource account: ' + error, true);
+                // Clear previous validation message
+                if (upnValidation) {
+                    upnValidation.textContent = '';
+                    upnValidation.className = 'validation-message';
                 }
             });
         }
 
+        // Setup Resource Account checking
+        if (checkUpnBtn && upnInput && upnValidation) {
+            checkUpnBtn.addEventListener('click', async () => {
+                const upn = (upnInput as HTMLInputElement).value.trim();
+                
+                if (!upn) {
+                    if (upnValidation) {
+                        upnValidation.textContent = 'Please enter a UPN';
+                        upnValidation.className = 'validation-message error';
+                    }
+                    return;
+                }
+                
+                // Validate UPN format
+                if (!upn.includes('@')) {
+                    if (upnValidation) {
+                        upnValidation.textContent = 'UPN must include @ symbol';
+                        upnValidation.className = 'validation-message error';
+                    }
+                    return;
+                }
+                
+                // Extract domain info for better messaging
+                const [username, domain] = upn.split('@');
+                const domainParts = domain.split('.');
+                const orgName = domainParts[0]; // e.g., "testeuc" from "testeuc.no"
+                const onmicrosoftDomain = `${orgName}.onmicrosoft.com`;
+                
+                showLoader();
+                const loaderText = document.getElementById('loaderText');
+                if (loaderText) loaderText.textContent = 'Checking resource account...';
+                
+                try {
+                    const result = await ipcRenderer.invoke('check-resource-account', upn);
+                    
+                    hideLoader();
+                    
+                    if (result.success) {
+                        if (result.exists) {
+                            // Account exists
+                            if (upnValidation) {
+                                const domainType = result.domain === 'original' ? domain : onmicrosoftDomain;
+                                if (result.domain === 'original') {
+                                    // Account exists with the exact domain that was entered
+                                    upnValidation.textContent = `Resource account found with domain: ${domain}`;
+                                } else {
+                                    // Account exists but with a different domain (.onmicrosoft.com)
+                                    upnValidation.textContent = `Resource account found with domain: ${onmicrosoftDomain} (use this domain instead)`;
+                                }
+                                upnValidation.className = 'validation-message success';
+                            }
+                        } else {
+                            // Account does not exist in either domain
+                            if (upnValidation) {
+                                upnValidation.textContent = `No resource account found with either ${domain} or ${onmicrosoftDomain} domains.`;
+                                upnValidation.className = 'validation-message error';
+                            }
+                        }
+                    } else {
+                        // Error checking account
+                        if (upnValidation) {
+                            upnValidation.textContent = result.error || 'Error checking account';
+                            upnValidation.className = 'validation-message error';
+                        }
+                    }
+                } catch (error) {
+                    hideLoader();
+                    
+                    if (upnValidation) {
+                        upnValidation.textContent = 'Error checking account: ' + (error as Error).message;
+                        upnValidation.className = 'validation-message error';
+                    }
+                }
+            });
+        }
+        
         // Reset button functionality
         if (resetBtn) {
             resetBtn.addEventListener('click', resetForm);
+        }
+        
+        // Reset account button functionality
+        if (resetAccountBtn) {
+            resetAccountBtn.addEventListener('click', resetAccountForm);
         }
 
         // Quit button functionality
@@ -442,5 +505,27 @@ function resetForm() {
     // Focus on serial number input instead of going back to welcome tab
     if (serialNumberInput) {
         serialNumberInput.focus();
+    }
+}
+
+function resetAccountForm() {
+    // Reset UPN input
+    const upnInput = document.getElementById('upn') as HTMLInputElement;
+    if (upnInput) {
+        upnInput.value = '';
+        upnInput.disabled = false;
+    }
+    
+    // Reset validation message
+    const upnValidation = document.getElementById('upnValidation');
+    if (upnValidation) {
+        upnValidation.textContent = '';
+        upnValidation.className = 'validation-message';
+    }
+    
+    // Re-enable check button (but disabled since no input)
+    const checkUpnBtn = document.getElementById('checkUpnBtn') as HTMLButtonElement;
+    if (checkUpnBtn) {
+        checkUpnBtn.disabled = true;
     }
 } 

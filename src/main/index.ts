@@ -138,6 +138,105 @@ ipcMain.handle('provision-intune', async (_, { serialNumber, description }) => {
     }
 });
 
+// Resource account handlers
+ipcMain.handle('check-resource-account', async (_, upn) => {
+    try {
+        logger.info(`Checking if resource account exists: ${upn}`);
+        const graphService = GraphService.getInstance();
+        
+        // Parse the UPN to extract username and domain parts
+        const upnParts = upn.split('@');
+        if (upnParts.length !== 2) {
+            return {
+                success: false,
+                error: `Invalid UPN format: ${upn}`
+            };
+        }
+        
+        const [username, domain] = upnParts;
+        
+        // First try with the original domain
+        try {
+            const user = await graphService.checkUser(upn);
+            if (user) {
+                logger.info(`Resource account found with original domain: ${upn}`);
+                return {
+                    success: true,
+                    exists: true,
+                    account: user,
+                    domain: 'original'
+                };
+            }
+        } catch (error) {
+            logger.info(`Resource account not found with original domain: ${upn}`);
+        }
+        
+        // If not found, try with onmicrosoft.com domain
+        // Extract the first part of the domain (e.g., "banenor" from "banenor.no")
+        const domainParts = domain.split('.');
+        const onmicrosoftDomain = `${domainParts[0]}.onmicrosoft.com`;
+        const onmicrosoftUpn = `${username}@${onmicrosoftDomain}`;
+        
+        try {
+            const user = await graphService.checkUser(onmicrosoftUpn);
+            if (user) {
+                logger.info(`Resource account found with onmicrosoft domain: ${onmicrosoftUpn}`);
+                return {
+                    success: true,
+                    exists: true,
+                    account: user,
+                    domain: 'onmicrosoft'
+                };
+            }
+        } catch (error) {
+            logger.info(`Resource account not found with onmicrosoft domain: ${onmicrosoftUpn}`);
+        }
+        
+        // If we get here, no account was found with either domain
+        return {
+            success: true,
+            exists: false
+        };
+    } catch (error) {
+        logger.error('Error checking resource account:', error);
+        return {
+            success: false,
+            error: `Failed to check resource account: ${(error as Error).message || String(error)}`
+        };
+    }
+});
+
+ipcMain.handle('create-resource-account', async (_, { upn, displayName, password }) => {
+    try {
+        logger.info(`Creating resource account: ${upn}`);
+        const graphService = GraphService.getInstance();
+        
+        // Check if the account already exists
+        const existingAccount = await graphService.checkUser(upn);
+        
+        if (existingAccount) {
+            return {
+                success: false,
+                error: `Resource account ${upn} already exists`
+            };
+        }
+        
+        // Create the account
+        const newAccount = await graphService.createUser(displayName, upn);
+        
+        return {
+            success: true,
+            account: newAccount
+        };
+    } catch (error) {
+        logger.error('Error creating resource account:', error);
+        return {
+            success: false,
+            error: `Failed to create resource account: ${(error as Error).message || String(error)}`
+        };
+    }
+});
+
 app.whenReady().then(() => {
     createWindow();
 

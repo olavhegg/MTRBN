@@ -795,6 +795,11 @@ button {
     color: #28a745;
 }
 
+.validation-message.warning {
+    color: #ffc107; /* Warning yellow color */
+    font-weight: 500;
+}
+
 .info-message {
     display: block;
     margin-top: 0.25rem;
@@ -1454,6 +1459,46 @@ button {
 
 .feature-btn:hover {
     background-color: #0747A6;
+}
+
+/* Limitations section styles */
+.limitations-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    text-align: left;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.limitations-section h3 {
+    color: #856404;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.limitations-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.limitations-list li {
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    position: relative;
+    color: #856404;
+}
+
+.limitations-list li::before {
+    content: "!";
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+    color: #856404;
 }
 
 /* Footer styles */
