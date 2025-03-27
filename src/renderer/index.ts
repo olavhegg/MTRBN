@@ -77,6 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkUpnBtn = document.getElementById('checkUpnBtn');
         const upnValidation = document.getElementById('upnValidation');
         const resetAccountBtn = document.getElementById('resetAccountBtn');
+        // New elements for account update
+        const accountUpdateSection = document.getElementById('accountUpdateSection');
+        const updateDisplayName = document.getElementById('updateDisplayName');
+        const updateAccountBtn = document.getElementById('updateAccountBtn');
+        const updateSuccessMessage = document.getElementById('updateSuccessMessage');
 
         // Create a container for status messages if needed
         let statusContainer = document.querySelector('.status-container');
@@ -342,6 +347,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     upnValidation.textContent = '';
                     upnValidation.className = 'validation-message';
                 }
+                
+                // Hide update section when input changes
+                if (accountUpdateSection) {
+                    accountUpdateSection.classList.add('hidden');
+                }
             });
         }
 
@@ -389,10 +399,26 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const domainType = result.domain === 'original' ? domain : onmicrosoftDomain;
                                 if (result.domain === 'original') {
                                     // Account exists with the exact domain that was entered
-                                    upnValidation.textContent = `Resource account found with domain: ${domain}`;
+                                    upnValidation.textContent = `Resource account found with domain: ${domain}. You can update the display name.`;
+                                    
+                                    // Store the found UPN for update operations
+                                    if (upnInput) {
+                                        (upnInput as HTMLInputElement).dataset.foundUpn = upn;
+                                    }
+                                    
+                                    // Show account update section
+                                    if (accountUpdateSection) {
+                                        accountUpdateSection.classList.remove('hidden');
+                                        // Set current display name as placeholder if available
+                                        if (updateDisplayName && result.account && result.account.displayName) {
+                                            (updateDisplayName as HTMLInputElement).placeholder = `Current: ${result.account.displayName}`;
+                                        }
+                                    }
                                 } else {
                                     // Account exists but with a different domain (.onmicrosoft.com)
-                                    upnValidation.textContent = `Resource account found with domain: ${onmicrosoftDomain} (use this domain instead)`;
+                                    const correctUpn = `${username}@${onmicrosoftDomain}`;
+                                    upnValidation.textContent = `Resource account found with domain: ${onmicrosoftDomain}. Please use ${correctUpn} to update it.`;
+                                    upnValidation.className = 'validation-message warning';
                                 }
                                 upnValidation.className = 'validation-message success';
                             }
@@ -429,6 +455,44 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset account button functionality
         if (resetAccountBtn) {
             resetAccountBtn.addEventListener('click', resetAccountForm);
+        }
+
+        // Setup Update Account functionality
+        if (updateAccountBtn && upnInput && updateDisplayName && updateSuccessMessage) {
+            updateAccountBtn.addEventListener('click', async () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                const newDisplayName = (updateDisplayName as HTMLInputElement).value.trim();
+                
+                if (!upn || !newDisplayName) {
+                    showToast('Please enter a new display name', true);
+                    return;
+                }
+                
+                showLoader();
+                const loaderText = document.getElementById('loaderText');
+                if (loaderText) loaderText.textContent = 'Updating resource account...';
+                
+                try {
+                    const result = await ipcRenderer.invoke('update-resource-account', {
+                        upn,
+                        displayName: newDisplayName
+                    });
+                    
+                    hideLoader();
+                    
+                    if (result.success) {
+                        // Show success message
+                        updateSuccessMessage.textContent = `Display name updated to: ${newDisplayName}`;
+                        updateSuccessMessage.classList.remove('hidden');
+                        showToast('Resource account updated successfully', false);
+                    } else {
+                        showToast(result.error || 'Failed to update resource account', true);
+                    }
+                } catch (error) {
+                    hideLoader();
+                    showToast('Error updating resource account: ' + (error as Error).message, true);
+                }
+            });
         }
 
         // Quit button functionality
@@ -514,6 +578,8 @@ function resetAccountForm() {
     if (upnInput) {
         upnInput.value = '';
         upnInput.disabled = false;
+        // Clear stored UPN
+        upnInput.dataset.foundUpn = '';
     }
     
     // Reset validation message
@@ -521,6 +587,25 @@ function resetAccountForm() {
     if (upnValidation) {
         upnValidation.textContent = '';
         upnValidation.className = 'validation-message';
+    }
+    
+    // Hide update section
+    const accountUpdateSection = document.getElementById('accountUpdateSection');
+    if (accountUpdateSection) {
+        accountUpdateSection.classList.add('hidden');
+    }
+    
+    // Reset update display name input
+    const updateDisplayName = document.getElementById('updateDisplayName') as HTMLInputElement;
+    if (updateDisplayName) {
+        updateDisplayName.value = '';
+        updateDisplayName.placeholder = 'Enter new display name';
+    }
+    
+    // Hide success message
+    const updateSuccessMessage = document.getElementById('updateSuccessMessage');
+    if (updateSuccessMessage) {
+        updateSuccessMessage.classList.add('hidden');
     }
     
     // Re-enable check button (but disabled since no input)

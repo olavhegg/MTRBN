@@ -53,9 +53,8 @@
                     <div class="limitations-section">
                         <h3>Current Limitations</h3>
                         <ul class="limitations-list">
-                            <li>Cannot create new resource accounts (functionality coming soon)</li>
-                            <li>Cannot provision in Teams Admin Center</li>
-                            <li>Cannot generate daily codes for devices</li>
+                            <li>Cannot create new resource accounts</li>
+                            <li>Cannot provision in Teams Admin Center or generate daily codes for devices</li>
                         </ul>
                     </div>
                 </div>
@@ -114,6 +113,17 @@
                             <small>Example: room01@banenor.no</small>
                             <div class="validation-message" id="upnValidation"></div>
                         </div>
+                        
+                        <div id="accountUpdateSection" class="account-update-section hidden">
+                            <div class="form-group">
+                                <label for="updateDisplayName">New Display Name:</label>
+                                <input type="text" id="updateDisplayName" required placeholder="Enter new display name">
+                                <small>Example: Meeting Room 01 - Updated</small>
+                            </div>
+                            <button type="button" id="updateAccountBtn" class="provision-btn">Update Display Name</button>
+                            <div id="updateSuccessMessage" class="permanent-success-message hidden"></div>
+                        </div>
+                        
                         <button id="resetAccountBtn" class="reset-btn">Check Another Account</button>
                     </div>
                 </form>

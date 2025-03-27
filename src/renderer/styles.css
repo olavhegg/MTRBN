@@ -1599,7 +1599,32 @@ button {
     max-width: 300px;
 }
 
+#resetAccountBtn {
+    display: block;
+    margin: 1.5rem auto 0;
+    width: 100%;
+    max-width: 300px;
+}
+
 main {
     padding-bottom: 30px; /* Reduced from 80px */
     min-height: calc(100vh - 250px); /* Adjusted for better fit */
+}
+
+.account-update-section {
+    background-color: #f0f7ff;
+    border: 1px solid #cce5ff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    transition: all 0.3s ease;
+}
+
+.account-update-section .form-group {
+    margin-bottom: 1rem;
+}
+
+.account-update-section .provision-btn {
+    width: 100%;
+    margin-bottom: 1rem;
 } 

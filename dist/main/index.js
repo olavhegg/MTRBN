@@ -256,6 +256,46 @@ electron_1.ipcMain.handle('create-resource-account', async (_, { upn, displayNam
         };
     }
 });
+// Handler for updating resource account display name
+electron_1.ipcMain.handle('update-resource-account', async (_, { upn, displayName }) => {
+    try {
+        logger_1.logger.info(`Updating resource account display name: ${upn} to "${displayName}"`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists
+        let existingAccount = null;
+        try {
+            existingAccount = await graphService.checkUser(upn);
+        }
+        catch (error) {
+            logger_1.logger.info(`Resource account not found: ${upn}`);
+            return {
+                success: false,
+                error: `Resource account ${upn} does not exist`
+            };
+        }
+        if (!existingAccount) {
+            return {
+                success: false,
+                error: `Resource account ${upn} does not exist`
+            };
+        }
+        // Update the display name
+        await graphService.updateUserDisplayName(upn, displayName);
+        // Get the updated account details
+        const updatedAccount = await graphService.checkUser(upn);
+        return {
+            success: true,
+            account: updatedAccount
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error updating resource account:', error);
+        return {
+            success: false,
+            error: `Failed to update resource account: ${error.message || String(error)}`
+        };
+    }
+});
 electron_1.app.whenReady().then(() => {
     createWindow();
     electron_1.app.on('activate', () => {

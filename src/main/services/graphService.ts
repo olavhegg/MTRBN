@@ -293,6 +293,21 @@ class GraphService {
         }
     }
 
+    public async updateUserDisplayName(upn: string, displayName: string): Promise<any> {
+        try {
+            const client = await this.getClient();
+            const user = {
+                displayName
+            };
+
+            logger.info(`Updating display name for ${upn} to "${displayName}"`);
+            return await client.api(`https://graph.microsoft.com/beta/users/${upn}`).patch(user);
+        } catch (error) {
+            logger.error('Error updating user display name:', error);
+            throw error;
+        }
+    }
+
     // Group Management
     public async checkGroupMembership(userId: string, groupId: string): Promise<boolean> {
         try {
