@@ -5,6 +5,10 @@ import * as fs from 'fs';
 import GraphService, { DeviceType } from './services/graphService';
 import { logger } from './utils/logger';
 
+// Disable certificate verification for corporate proxies
+app.commandLine.appendSwitch('ignore-certificate-errors');
+app.commandLine.appendSwitch('allow-insecure-localhost');
+
 // Prevent multiple instances
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {

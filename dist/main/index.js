@@ -41,6 +41,9 @@ const path = __importStar(require("path"));
 require("dotenv/config");
 const graphService_1 = __importDefault(require("./services/graphService"));
 const logger_1 = require("./utils/logger");
+// Disable certificate verification for corporate proxies
+electron_1.app.commandLine.appendSwitch('ignore-certificate-errors');
+electron_1.app.commandLine.appendSwitch('allow-insecure-localhost');
 // Prevent multiple instances
 const gotTheLock = electron_1.app.requestSingleInstanceLock();
 if (!gotTheLock) {

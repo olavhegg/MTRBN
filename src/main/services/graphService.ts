@@ -507,34 +507,16 @@ class GraphService {
                 };
             }
             
-            // Get MTR Resource Account group ID
-            // Note: In a real implementation, you'd have the group ID stored in environment variables
-            // or other config, or search for the group by display name first
+            // Get MTR Resource Account group ID from environment variables
             const groupName = 'MTR Resource Accounts';
-            let groupId = process.env.MTR_GROUP_ID;
+            const groupId = process.env.MTR_RecourceAccountsID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            isMember: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding MTR group:', error);
-                    return {
-                        isMember: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('MTR Resource Accounts group ID not found in environment variables');
+                return {
+                    isMember: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if user is a member of the group
@@ -595,30 +577,14 @@ class GraphService {
             
             // Get Room Account group ID
             const groupName = 'Room Accounts';
-            let groupId = process.env.ROOM_GROUP_ID;
+            const groupId = process.env.SHARED_GROUP_ID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            isMember: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding Room group:', error);
-                    return {
-                        isMember: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('Shared Group ID not found in environment variables');
+                return {
+                    isMember: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if user is a member of the group
@@ -677,32 +643,16 @@ class GraphService {
                 };
             }
             
-            // Get MTR group ID
+            // Get MTR group ID from environment variables
             const groupName = 'MTR Resource Accounts';
-            let groupId = process.env.MTR_GROUP_ID;
+            const groupId = process.env.MTR_RecourceAccountsID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            success: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding MTR group:', error);
-                    return {
-                        success: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('MTR Resource Accounts group ID not found in environment variables');
+                return {
+                    success: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if already a member
@@ -753,35 +703,19 @@ class GraphService {
                 };
             }
             
-            // Get MTR group ID
+            // Get MTR group ID from environment variables
             const groupName = 'MTR Resource Accounts';
-            let groupId = process.env.MTR_GROUP_ID;
+            const groupId = process.env.MTR_RecourceAccountsID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            success: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding MTR group:', error);
-                    return {
-                        success: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('MTR Resource Accounts group ID not found in environment variables');
+                return {
+                    success: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
-            // Check if actually a member
+            // Check if user is a member
             const membershipCheck = await this.checkMtrGroupMembership(upn);
             if (!membershipCheck.isMember) {
                 return {
@@ -829,30 +763,14 @@ class GraphService {
             
             // Get Room group ID
             const groupName = 'Room Accounts';
-            let groupId = process.env.ROOM_GROUP_ID;
+            const groupId = process.env.SHARED_GROUP_ID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            success: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding Room group:', error);
-                    return {
-                        success: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('Shared Group ID not found in environment variables');
+                return {
+                    success: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if already a member
@@ -905,30 +823,14 @@ class GraphService {
             
             // Get Room group ID
             const groupName = 'Room Accounts';
-            let groupId = process.env.ROOM_GROUP_ID;
+            const groupId = process.env.SHARED_GROUP_ID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            success: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding Room group:', error);
-                    return {
-                        success: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('Shared Group ID not found in environment variables');
+                return {
+                    success: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if actually a member
@@ -979,30 +881,14 @@ class GraphService {
             
             // Get Pro license group ID
             const groupName = 'MTR-Teams-Room-License-Teams Rooms Pro';
-            let groupId = process.env.PRO_GROUP_ID;
+            const groupId = process.env.PRO_GROUP_ID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            isMember: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding Pro license group:', error);
-                    return {
-                        isMember: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('Pro Group ID not found in environment variables');
+                return {
+                    isMember: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if user is a member of the group
@@ -1063,30 +949,14 @@ class GraphService {
             
             // Get Pro license group ID
             const groupName = 'MTR-Teams-Room-License-Teams Rooms Pro';
-            let groupId = process.env.PRO_GROUP_ID;
+            const groupId = process.env.PRO_GROUP_ID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            success: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding Pro license group:', error);
-                    return {
-                        success: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('Pro Group ID not found in environment variables');
+                return {
+                    success: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if already a member
@@ -1139,30 +1009,14 @@ class GraphService {
             
             // Get Pro license group ID
             const groupName = 'MTR-Teams-Room-License-Teams Rooms Pro';
-            let groupId = process.env.PRO_GROUP_ID;
+            const groupId = process.env.PRO_GROUP_ID;
             
             if (!groupId) {
-                // Attempt to find the group by name
-                try {
-                    const groups = await client.api('/groups')
-                        .filter(`displayName eq '${groupName}'`)
-                        .get();
-                    
-                    if (groups && groups.value && groups.value.length > 0) {
-                        groupId = groups.value[0].id;
-                    } else {
-                        return {
-                            success: false,
-                            message: `${groupName} group not found`
-                        };
-                    }
-                } catch (error) {
-                    logger.error('Error finding Pro license group:', error);
-                    return {
-                        success: false,
-                        message: `Error finding ${groupName} group`
-                    };
-                }
+                logger.error('Pro Group ID not found in environment variables');
+                return {
+                    success: false,
+                    message: `${groupName} group ID not configured`
+                };
             }
             
             // Check if actually a member

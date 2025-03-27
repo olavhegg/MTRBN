@@ -117,8 +117,8 @@
                         <div id="accountUpdateSection" class="account-update-section hidden">
                             <div class="form-group">
                                 <label for="updateDisplayName">New Display Name:</label>
-                                <input type="text" id="updateDisplayName" required placeholder="Enter new display name">
-                                <small>Example: Meeting Room 01 - Updated</small>
+                                <input type="text" id="updateDisplayName" required placeholder="Current display name">
+                                <small>Current display name will be shown here</small>
                             </div>
                             <button type="button" id="updateAccountBtn" class="provision-btn">Update Display Name</button>
                             <div id="updateSuccessMessage" class="permanent-success-message hidden"></div>
@@ -130,26 +130,28 @@
                             <div class="status-indicator">
                                 <div id="passwordStatusIndicator" class="indicator"></div>
                                 <span id="passwordStatusText">Not verified</span>
+                                <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
                             </div>
-                            <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
                             <div id="passwordSuccessMessage" class="action-success-message hidden"></div>
                             
                             <!-- Account status items -->
                             <div class="status-item">
-                                <span class="status-label">Account Unlocked:</span>
-                                <div id="accountLockedIndicator" class="indicator small"></div>
+                                <div class="status-indicator">
+                                    <div id="accountLockedIndicator" class="indicator"></div>
+                                    <span>Account Unlocked</span>
+                                </div>
                             </div>
                             <div class="status-item license-item">
                                 <div class="license-status">
-                                    <div id="resourceGroupIndicator" class="indicator small"></div>
-                                    <span>MTR-Resource Accounts</span>
+                                    <div id="resourceGroupIndicator" class="indicator"></div>
+                                    <span>MTR-Resource Accounts - Group Membership</span>
                                 </div>
                                 <div class="license-actions">
                                     <button id="addToMtrStatusBtn" class="small-action-btn">Add</button>
                                     <button id="removeFromMtrStatusBtn" class="small-action-btn">Remove</button>
                                 </div>
                             </div>
-                            <div class="license-note">Required for Teams Rooms Pro license. Controls whether this account has MTR functionality.</div>
+                            <div class="license-note">Required for all meeting rooms. This group is mandatory for any Teams room account.</div>
                         </div>
                         
                         <!-- License Management Section -->
@@ -159,19 +161,7 @@
                             
                             <div class="license-item">
                                 <div class="license-status">
-                                    <div id="mtrGroupIndicator" class="indicator small"></div>
-                                    <span>MTR-Resource Accounts</span>
-                                </div>
-                                <div class="license-actions">
-                                    <button id="addToMtrBtn" class="small-action-btn">Add</button>
-                                    <button id="removeFromMtrBtn" class="small-action-btn">Remove</button>
-                                </div>
-                            </div>
-                            <div class="license-note">Required for Microsoft Teams Rooms Pro license. Provides full MTR functionality including advanced management features.</div>
-                            
-                            <div class="license-item">
-                                <div class="license-status">
-                                    <div id="roomGroupIndicator" class="indicator small"></div>
+                                    <div id="roomGroupIndicator" class="indicator"></div>
                                     <span>MTR-Teams-Panel-License-Microsoft Teams Shared Devices</span>
                                 </div>
                                 <div class="license-actions">
@@ -179,11 +169,11 @@
                                     <button id="removeFromRoomBtn" class="small-action-btn">Remove</button>
                                 </div>
                             </div>
-                            <div class="license-note">Required for Teams Shared Devices license. Provides basic room functionality without advanced management features.</div>
+                            <div class="license-note">Required for Teams Shared Devices license. Required for all rooms without Rallybar.</div>
                             
                             <div class="license-item">
                                 <div class="license-status">
-                                    <div id="proGroupIndicator" class="indicator small"></div>
+                                    <div id="proGroupIndicator" class="indicator"></div>
                                     <span>MTR-Teams-Room-License-Teams Rooms Pro</span>
                                 </div>
                                 <div class="license-actions">
@@ -191,7 +181,7 @@
                                     <button id="removeFromProBtn" class="small-action-btn">Remove</button>
                                 </div>
                             </div>
-                            <div class="license-note">Required for Teams Rooms Pro license. Provides advanced room functionality and management capabilities.</div>
+                            <div class="license-note">Required for Teams Rooms Pro license. Required for all rooms with Rallybar.</div>
                             
                             <div id="licenseSuccessMessage" class="action-success-message hidden"></div>
                         </div>

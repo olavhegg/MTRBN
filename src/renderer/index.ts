@@ -924,22 +924,22 @@ async function checkAccountUnlockStatus(upn: string) {
     
     try {
         // Set to loading state
-        accountLockedIndicator.className = 'indicator small';
+        accountLockedIndicator.className = 'indicator';
         
         const result = await ipcRenderer.invoke('check-account-unlock', upn);
         
         if (result.success) {
             if (result.isUnlocked) {
-                accountLockedIndicator.className = 'indicator small success';
+                accountLockedIndicator.className = 'indicator success';
             } else {
-                accountLockedIndicator.className = 'indicator small error';
+                accountLockedIndicator.className = 'indicator error';
             }
         } else {
-            accountLockedIndicator.className = 'indicator small error';
+            accountLockedIndicator.className = 'indicator error';
             showToast(result.error || 'Failed to check account unlock status', true);
         }
     } catch (error) {
-        accountLockedIndicator.className = 'indicator small error';
+        accountLockedIndicator.className = 'indicator error';
         showToast('Error checking account unlock status: ' + (error as Error).message, true);
     }
 }
