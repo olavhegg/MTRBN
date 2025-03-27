@@ -270,14 +270,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         hideLoader();
                         showToast(`Device ${serialNumber} is already provisioned in Intune`, false);
                         
-                        // Update results with existing device info
-                        showResults({
-                            success: true,
-                            device: checkResult.device,
-                            user: null,
-                            groups: [],
-                            errors: []
-                        });
+                        // Show permanent success message
+                        const permanentSuccessMessage = document.getElementById('permanentSuccessMessage');
+                        if (permanentSuccessMessage) {
+                            permanentSuccessMessage.textContent = `Device ${serialNumber} is already provisioned in Intune`;
+                            permanentSuccessMessage.classList.remove('hidden');
+                        }
+                        
+                        // Show reset button
+                        const resetBtn = document.getElementById('resetBtn');
+                        if (resetBtn) {
+                            resetBtn.classList.remove('hidden');
+                        }
                         return;
                     }
                     
@@ -295,13 +299,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (result.success) {
                         showToast(`Device ${serialNumber} successfully registered in Intune`, false);
-                        showResults({
-                            success: true,
-                            device: result.device,
-                            user: null,
-                            groups: [],
-                            errors: []
-                        });
+                        
+                        // Show permanent success message
+                        const permanentSuccessMessage = document.getElementById('permanentSuccessMessage');
+                        if (permanentSuccessMessage) {
+                            permanentSuccessMessage.textContent = `Device ${serialNumber} successfully registered in Intune`;
+                            permanentSuccessMessage.classList.remove('hidden');
+                        }
+                        
+                        // Show reset button
+                        const resetBtn = document.getElementById('resetBtn');
+                        if (resetBtn) {
+                            resetBtn.classList.remove('hidden');
+                        }
                     } else {
                         showToast(result.error || 'Failed to provision device', true);
                     }
@@ -342,13 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     hideLoader();
                     
                     if (result.success) {
-                        showResults({
-                            success: true,
-                            device: null,
-                            user: result.user,
-                            groups: result.groups || [],
-                            errors: []
-                        });
+                        showToast(`Resource account ${upn} successfully created`, false);
                     } else {
                         showToast(result.error || 'Failed to create resource account', true);
                     }
@@ -404,39 +408,6 @@ function showToast(message: string, isError = false) {
     }
 }
 
-function showResults(results: SetupResults) {
-    const resultsSection = document.getElementById('results');
-    const deviceStatus = document.getElementById('deviceStatus');
-    const userStatus = document.getElementById('userStatus');
-    const groupStatus = document.getElementById('groupStatus');
-    
-    if (!resultsSection || !deviceStatus || !userStatus || !groupStatus) return;
-    
-    // Show results section
-    resultsSection.classList.remove('hidden');
-    
-    // Update device status
-    if (results.device) {
-        deviceStatus.textContent = JSON.stringify(results.device, null, 2);
-    } else {
-        deviceStatus.textContent = 'No device information';
-    }
-    
-    // Update user status
-    if (results.user) {
-        userStatus.textContent = JSON.stringify(results.user, null, 2);
-    } else {
-        userStatus.textContent = 'No user information';
-    }
-    
-    // Update group status
-    if (results.groups && results.groups.length > 0) {
-        groupStatus.textContent = results.groups.join('\n');
-    } else {
-        groupStatus.textContent = 'No group memberships';
-    }
-}
-
 function resetForm() {
     // Reset form values
     const serialNumberInput = document.getElementById('serialNumber') as HTMLInputElement;
@@ -445,6 +416,8 @@ function resetForm() {
     const descriptionInput = document.getElementById('description') as HTMLInputElement;
     const checkSerialBtn = document.getElementById('checkSerialBtn') as HTMLButtonElement;
     const provisionSerialNumberInput = document.getElementById('provisionSerialNumber') as HTMLInputElement;
+    const permanentSuccessMessage = document.getElementById('permanentSuccessMessage');
+    const resetBtn = document.getElementById('resetBtn');
     
     if (serialNumberInput) serialNumberInput.value = '';
     if (upnInput) upnInput.value = '';
@@ -452,10 +425,8 @@ function resetForm() {
     if (descriptionInput) descriptionInput.value = '';
     if (provisionSerialNumberInput) provisionSerialNumberInput.value = '';
     if (checkSerialBtn) checkSerialBtn.disabled = true;
-    
-    // Hide results section
-    const resultsSection = document.getElementById('results');
-    if (resultsSection) resultsSection.classList.add('hidden');
+    if (permanentSuccessMessage) permanentSuccessMessage.classList.add('hidden');
+    if (resetBtn) resetBtn.classList.add('hidden');
     
     // Hide device setup section
     const deviceSetupSection = document.getElementById('deviceSetupSection');
@@ -468,18 +439,8 @@ function resetForm() {
         validationElement.className = 'validation-message';
     }
     
-    // Go back to welcome tab
-    const welcomeTab = document.querySelector('.tab-btn[data-tab="welcome"]');
-    if (welcomeTab) {
-        (welcomeTab as HTMLElement).click();
+    // Focus on serial number input instead of going back to welcome tab
+    if (serialNumberInput) {
+        serialNumberInput.focus();
     }
-}
-
-interface SetupResults {
-    success: boolean;
-    device: any;
-    user: any;
-    groups: string[];
-    errors: string[];
-    error?: string;
 } 

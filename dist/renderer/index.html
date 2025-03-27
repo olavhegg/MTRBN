@@ -62,11 +62,11 @@
             <!-- Intune Provisioning Tab -->
             <div class="tab-content" id="intune">
                 <div class="form-section centered-section">
-                    <h2>Device Information</h2>
+                    <h2>Register Logitech MTR Device in Intune</h2>
                     <div class="form-group">
                         <div class="requirements-note">
                             <span class="requirement-icon">ℹ️</span>
-                            <span class="requirement-text">Serial number must be exactly 12 characters long and end with '2'</span>
+                            <span class="requirement-text">This tab allows you to register Logitech MTR devices in Microsoft Intune. Enter the device serial number (must be exactly 12 characters and end with '2'), then click Check to verify if it's already registered.</span>
                         </div>
                         <label for="serialNumber">Input Serial Number:</label>
                         <div class="input-with-button">
@@ -89,6 +89,8 @@
                         <small>Example: Logitech Rallybar B260 S33</small>
                     </div>
                     <button type="button" id="provisionIntuneBtn" class="provision-btn">Register in Intune</button>
+                    <div id="permanentSuccessMessage" class="permanent-success-message hidden"></div>
+                    <button id="resetBtn" class="reset-btn">Setup Another Device</button>
                 </div>
             </div>
 
