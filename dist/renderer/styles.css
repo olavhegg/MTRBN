@@ -1289,13 +1289,16 @@ button {
     background-color: #2A357A;
 }
 
+/* Specifically target the device setup section for centering */
 #deviceSetupSection {
     background-color: #f8f9fa;
-    padding: 1.5rem;
+    padding: 2rem;
     border-radius: 8px;
-    margin: 1.5rem 0;
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
+    max-width: 600px; 
+    margin: 2rem auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 #deviceSetupSection:not(.hidden) {
@@ -1483,14 +1486,38 @@ button {
 .centered-section {
     max-width: 600px;
     margin: 0 auto 2rem auto;
-    padding: 0 15px;
+    padding: 0 1.5rem;
 }
 
 .centered-section h2 {
     margin-bottom: 1.5rem;
     text-align: center;
+    color: var(--secondary-color);
 }
 
 .centered-section .form-group {
     text-align: left;
+    padding: 1rem 1.5rem;
+}
+
+/* Fix for the device information section */
+.form-section.centered-section {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    max-width: 600px; 
+    margin: 2rem auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Other layout improvements */
+.centered-section .input-with-button {
+    align-items: center;
+}
+
+.centered-section .check-btn {
+    height: 44px;
+    min-width: 100px;
 } 

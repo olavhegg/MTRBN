@@ -118,7 +118,8 @@ ipcMain.handle('provision-intune', async (_, { serialNumber, description }) => {
         
         // If device doesn't exist, add it
         if (!deviceInfo) {
-            deviceInfo = await graphService.addDeviceSerial(serialNumber, description);
+            await graphService.addDeviceSerial(serialNumber, description);
+            deviceInfo = await graphService.checkDeviceSerial(serialNumber);
             logger.info(`Device provisioned successfully: ${serialNumber}`);
         } else {
             logger.info(`Device already exists in Intune: ${serialNumber}`);

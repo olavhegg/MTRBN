@@ -11,7 +11,9 @@
     "test-graph": "tsc && node dist/test-graph.js",
     "test-graph-interactive": "tsc && node dist/test-graph-interactive.js",
     "debug-graph": "tsc && node dist/debug-graph.js",
-    "check-env": "tsc && node dist/check-env.js"
+    "check-env": "tsc && node dist/check-env.js",
+    "test-api-connection": "tsc && node dist/api-connection-tester.js",
+    "test-api": "tsc && node dist/test-api-helper.js"
   },
   "keywords": [
     "electron",
@@ -40,6 +42,7 @@
     "@microsoft/microsoft-graph-client": "^3.0.1",
     "@types/node-fetch": "^2.6.12",
     "@types/winston": "^2.4.4",
+    "axios": "^1.8.4",
     "dotenv": "^16.0.0",
     "electron": "^28.0.0",
     "electron-store": "^8.1.0",

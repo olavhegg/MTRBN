@@ -145,7 +145,8 @@ electron_1.ipcMain.handle('provision-intune', async (_, { serialNumber, descript
         let deviceInfo = await graphService.checkDeviceSerial(serialNumber);
         // If device doesn't exist, add it
         if (!deviceInfo) {
-            deviceInfo = await graphService.addDeviceSerial(serialNumber, description);
+            await graphService.addDeviceSerial(serialNumber, description);
+            deviceInfo = await graphService.checkDeviceSerial(serialNumber);
             logger_1.logger.info(`Device provisioned successfully: ${serialNumber}`);
         }
         else {

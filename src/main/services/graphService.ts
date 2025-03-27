@@ -194,31 +194,37 @@ class GraphService {
         }
     }
 
-    public async addDeviceSerial(serialNumber: string, description: string): Promise<DeviceIdentity> {
+    public async addDeviceSerial(serialNumber: string, description: string): Promise<void> {
         try {
             console.log(`[GraphService] Adding device serial: ${serialNumber}`);
             const client = await this.getClient();
-            
-            const device: DeviceIdentity = {
-                importedDeviceIdentifier: serialNumber,
-                description: description,
-                enrollmentState: 'notContacted',
-                importedDeviceIdentityType: 'serialNumber',
-                platform: 'unknown'
+    
+            const requestBody = {
+                importedDeviceIdentities: [
+                    {
+                        importedDeviceIdentifier: serialNumber,
+                        importedDeviceIdentityType: 'serialNumber',
+                        description: description
+                    }
+                ],
+                overwriteImportedDeviceIdentities: false
             };
-            
-            console.log(`[GraphService] Posting to deviceManagement API...`);
-            const result = await client.api('https://graph.microsoft.com/beta/deviceManagement/importedDeviceIdentities')
-                .post(device);
-                
-            console.log(`[GraphService] Device added successfully:`, result);
-            return result;
+    
+            console.log(`[GraphService] Posting to deviceManagement/importedDeviceIdentities/importDeviceIdentityList...`);
+            await client
+                .api('/deviceManagement/importedDeviceIdentities/importDeviceIdentityList')
+                .version('beta')
+                .post(requestBody);
+    
+            console.log(`[GraphService] Device added successfully.`);
         } catch (error) {
             console.error('[GraphService] Error adding device serial:', error);
             logger.error('Error adding device serial:', error);
             throw error;
         }
     }
+    
+    
 
     // Device Type Validation
     public validateDevice(serialNumber: string): DeviceInfo {
