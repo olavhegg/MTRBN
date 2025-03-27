@@ -124,6 +124,66 @@
                             <div id="updateSuccessMessage" class="permanent-success-message hidden"></div>
                         </div>
                         
+                        <!-- Account Status Section -->
+                        <div id="accountPasswordSection" class="account-section hidden">
+                            <h3>Account Status</h3>
+                            <div class="status-indicator">
+                                <div id="passwordStatusIndicator" class="indicator"></div>
+                                <span id="passwordStatusText">Not verified</span>
+                            </div>
+                            <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
+                            <div id="passwordSuccessMessage" class="action-success-message hidden"></div>
+                            
+                            <!-- Account status items -->
+                            <div class="status-item">
+                                <span class="status-label">Account Unlocked:</span>
+                                <div id="accountLockedIndicator" class="indicator small"></div>
+                            </div>
+                            <div class="status-item license-item">
+                                <div class="license-status">
+                                    <div id="resourceGroupIndicator" class="indicator small"></div>
+                                    <span>MTR Resource Accounts Group</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button id="addToMtrStatusBtn" class="small-action-btn">Add</button>
+                                    <button id="removeFromMtrStatusBtn" class="small-action-btn">Remove</button>
+                                </div>
+                            </div>
+                            <div class="license-note">Required for Teams Rooms Pro license. Controls whether this account has MTR functionality.</div>
+                        </div>
+                        
+                        <!-- License Management Section -->
+                        <div id="licensesSection" class="account-section hidden">
+                            <h3>License Group Memberships</h3>
+                            <p>Group memberships determine what Microsoft Teams licenses and features are available to this account.</p>
+                            
+                            <div class="license-item">
+                                <div class="license-status">
+                                    <div id="mtrGroupIndicator" class="indicator small"></div>
+                                    <span>MTR Resource Accounts (Teams Rooms Pro License)</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button id="addToMtrBtn" class="small-action-btn">Add</button>
+                                    <button id="removeFromMtrBtn" class="small-action-btn">Remove</button>
+                                </div>
+                            </div>
+                            <div class="license-note">Required for Microsoft Teams Rooms Pro license. Provides full MTR functionality including advanced management features.</div>
+                            
+                            <div class="license-item">
+                                <div class="license-status">
+                                    <div id="roomGroupIndicator" class="indicator small"></div>
+                                    <span>Room Accounts (Teams Shared Devices License)</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button id="addToRoomBtn" class="small-action-btn">Add</button>
+                                    <button id="removeFromRoomBtn" class="small-action-btn">Remove</button>
+                                </div>
+                            </div>
+                            <div class="license-note">Required for Teams Shared Devices license. Provides basic room functionality without advanced management features.</div>
+                            
+                            <div id="licenseSuccessMessage" class="action-success-message hidden"></div>
+                        </div>
+                        
                         <button id="resetAccountBtn" class="reset-btn">Check Another Account</button>
                     </div>
                 </form>

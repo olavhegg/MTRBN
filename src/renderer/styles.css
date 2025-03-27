@@ -1627,4 +1627,187 @@ main {
 .account-update-section .provision-btn {
     width: 100%;
     margin-bottom: 1rem;
+}
+
+/* Account Sections Styles */
+.account-section {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    transition: all 0.3s ease;
+}
+
+.account-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #495057;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.account-section h4 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #6c757d;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Status Indicator */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #adb5bd;
+    margin-right: 0.5rem;
+}
+
+.indicator.small {
+    width: 12px;
+    height: 12px;
+}
+
+.indicator.success {
+    background-color: #28a745;
+}
+
+.indicator.error {
+    background-color: #dc3545;
+}
+
+.indicator.warning {
+    background-color: #ffc107;
+}
+
+/* Status Text */
+#passwordStatusText {
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+/* Action Buttons */
+.action-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.action-btn:hover {
+    background-color: #5a6268;
+}
+
+.action-btn:disabled {
+    background-color: #ced4da;
+    cursor: not-allowed;
+}
+
+/* Success Messages */
+.action-success-message {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* License List */
+.status-list {
+    list-style-type: none;
+    margin: 0 0 1rem 0;
+    padding: 0;
+}
+
+.status-list li {
+    padding: 0.25rem 0;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.status-list li.placeholder {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+/* Status Items */
+.status-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.status-label {
+    width: 200px;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+/* License management styles */
+.license-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 5px;
+    position: relative;
+}
+
+.license-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.license-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.small-action-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.small-action-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.small-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.license-note {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+    font-style: italic;
+    padding-left: 0.5rem;
 } 

@@ -124,6 +124,57 @@
                             <div id="updateSuccessMessage" class="permanent-success-message hidden"></div>
                         </div>
                         
+                        <!-- Password Status Section -->
+                        <div id="accountPasswordSection" class="account-section hidden">
+                            <h3>Account Status</h3>
+                            <div class="status-indicator">
+                                <div id="passwordStatusIndicator" class="indicator"></div>
+                                <span id="passwordStatusText">Not verified</span>
+                            </div>
+                            <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
+                            <div id="passwordSuccessMessage" class="action-success-message hidden"></div>
+                            
+                            <!-- Account status items -->
+                            <div class="status-item">
+                                <span class="status-label">Account Unlocked:</span>
+                                <div id="accountLockedIndicator" class="indicator small"></div>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">MTR Resource Accounts Group:</span>
+                                <div id="resourceGroupIndicator" class="indicator small"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- License Management Section -->
+                        <div id="licensesSection" class="account-section hidden">
+                            <h3>Group Memberships</h3>
+                            <p>Account group memberships determine what licenses and features are available.</p>
+                            
+                            <div class="license-item">
+                                <div class="license-status">
+                                    <div id="mtrGroupIndicator" class="indicator small"></div>
+                                    <span>MTR Resource Accounts</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button id="addToMtrBtn" class="small-action-btn">Add</button>
+                                    <button id="removeFromMtrBtn" class="small-action-btn">Remove</button>
+                                </div>
+                            </div>
+                            
+                            <div class="license-item">
+                                <div class="license-status">
+                                    <div id="roomGroupIndicator" class="indicator small"></div>
+                                    <span>Room Accounts</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button id="addToRoomBtn" class="small-action-btn">Add</button>
+                                    <button id="removeFromRoomBtn" class="small-action-btn">Remove</button>
+                                </div>
+                            </div>
+                            
+                            <div id="licenseSuccessMessage" class="action-success-message hidden"></div>
+                        </div>
+                        
                         <button id="resetAccountBtn" class="reset-btn">Check Another Account</button>
                     </div>
                 </form>

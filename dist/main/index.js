@@ -296,6 +296,335 @@ electron_1.ipcMain.handle('update-resource-account', async (_, { upn, displayNam
         };
     }
 });
+// Handler for verifying resource account password
+electron_1.ipcMain.handle('verify-account-password', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Verifying password for resource account: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // First check if the account exists
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        // Now verify the password
+        const verificationResult = await graphService.verifyUserPassword(upn);
+        return {
+            success: true,
+            isValid: verificationResult.isValid,
+            message: verificationResult.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error verifying resource account password:', error);
+        return {
+            success: false,
+            error: `Failed to verify password: ${error.message}`
+        };
+    }
+});
+// Handler for resetting resource account password
+electron_1.ipcMain.handle('reset-account-password', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Resetting password for resource account: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // First check if the account exists
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        await graphService.resetUserPassword(upn);
+        return {
+            success: true,
+            message: "Password reset successful"
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error resetting resource account password:', error);
+        return {
+            success: false,
+            error: `Failed to reset password: ${error.message}`
+        };
+    }
+});
+// Handler for checking if account is unlocked
+electron_1.ipcMain.handle('check-account-unlock', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Checking if account is unlocked: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.checkAccountUnlocked(upn);
+        return {
+            success: true,
+            isUnlocked: result.isUnlocked,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error checking account unlock status:', error);
+        return {
+            success: false,
+            error: `Failed to check account status: ${error.message}`
+        };
+    }
+});
+// Handler for checking group membership
+electron_1.ipcMain.handle('check-group-membership', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Checking group membership for: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.checkMtrGroupMembership(upn);
+        return {
+            success: true,
+            isMember: result.isMember,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error checking group membership:', error);
+        return {
+            success: false,
+            error: `Failed to check group membership: ${error.message}`
+        };
+    }
+});
+// Handler for checking Room group membership
+electron_1.ipcMain.handle('check-room-membership', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Checking Room group membership for: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.checkRoomGroupMembership(upn);
+        return {
+            success: true,
+            isMember: result.isMember,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error checking Room group membership:', error);
+        return {
+            success: false,
+            error: `Failed to check Room group membership: ${error.message}`
+        };
+    }
+});
+// Handler for adding user to MTR group
+electron_1.ipcMain.handle('add-to-mtr-group', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Adding user to MTR group: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.addUserToMtrGroup(upn);
+        return {
+            success: result.success,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error adding user to MTR group:', error);
+        return {
+            success: false,
+            error: `Failed to add to MTR group: ${error.message}`
+        };
+    }
+});
+// Handler for removing user from MTR group
+electron_1.ipcMain.handle('remove-from-mtr-group', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Removing user from MTR group: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.removeUserFromMtrGroup(upn);
+        return {
+            success: result.success,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error removing user from MTR group:', error);
+        return {
+            success: false,
+            error: `Failed to remove from MTR group: ${error.message}`
+        };
+    }
+});
+// Handler for adding user to Room group
+electron_1.ipcMain.handle('add-to-room-group', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Adding user to Room group: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.addUserToRoomGroup(upn);
+        return {
+            success: result.success,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error adding user to Room group:', error);
+        return {
+            success: false,
+            error: `Failed to add to Room group: ${error.message}`
+        };
+    }
+});
+// Handler for removing user from Room group
+electron_1.ipcMain.handle('remove-from-room-group', async (_, upn) => {
+    try {
+        logger_1.logger.info(`Removing user from Room group: ${upn}`);
+        const graphService = graphService_1.default.getInstance();
+        // Check if the account exists first
+        try {
+            const account = await graphService.checkUser(upn);
+            if (!account) {
+                return {
+                    success: false,
+                    error: `Resource account ${upn} does not exist`
+                };
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('Error checking account existence:', error);
+            return {
+                success: false,
+                error: `Account check failed: ${error.message}`
+            };
+        }
+        const result = await graphService.removeUserFromRoomGroup(upn);
+        return {
+            success: result.success,
+            message: result.message
+        };
+    }
+    catch (error) {
+        logger_1.logger.error('Error removing user from Room group:', error);
+        return {
+            success: false,
+            error: `Failed to remove from Room group: ${error.message}`
+        };
+    }
+});
 electron_1.app.whenReady().then(() => {
     createWindow();
     electron_1.app.on('activate', () => {

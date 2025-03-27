@@ -82,6 +82,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const updateDisplayName = document.getElementById('updateDisplayName');
         const updateAccountBtn = document.getElementById('updateAccountBtn');
         const updateSuccessMessage = document.getElementById('updateSuccessMessage');
+        // Elements for password status
+        const accountPasswordSection = document.getElementById('accountPasswordSection');
+        const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
+        const passwordStatusText = document.getElementById('passwordStatusText');
+        const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+        const passwordSuccessMessage = document.getElementById('passwordSuccessMessage');
+        // Elements for license management placeholder
+        const licensesSection = document.getElementById('licensesSection');
+        // Elements for account status placeholder
+        const accountStatusSection = document.getElementById('accountStatusSection');
 
         // Create a container for status messages if needed
         let statusContainer = document.querySelector('.status-container');
@@ -399,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const domainType = result.domain === 'original' ? domain : onmicrosoftDomain;
                                 if (result.domain === 'original') {
                                     // Account exists with the exact domain that was entered
-                                    upnValidation.textContent = `Resource account found with domain: ${domain}. You can update the display name.`;
+                                    upnValidation.textContent = `Resource account found, edit it below.`;
                                     
                                     // Store the found UPN for update operations
                                     if (upnInput) {
@@ -413,6 +423,26 @@ document.addEventListener('DOMContentLoaded', () => {
                                         if (updateDisplayName && result.account && result.account.displayName) {
                                             (updateDisplayName as HTMLInputElement).placeholder = `Current: ${result.account.displayName}`;
                                         }
+                                    }
+                                    
+                                    // Show password status section
+                                    if (accountPasswordSection) {
+                                        accountPasswordSection.classList.remove('hidden');
+                                        // Verify password status
+                                        verifyPasswordStatus(upn);
+                                    }
+                                    
+                                    // Show license management placeholder
+                                    if (licensesSection) {
+                                        licensesSection.classList.remove('hidden');
+                                    }
+                                    
+                                    // Check and update account status indicators
+                                    checkAccountStatus(upn);
+                                    
+                                    // Show account status placeholder
+                                    if (accountStatusSection) {
+                                        accountStatusSection.classList.remove('hidden');
                                     }
                                 } else {
                                     // Account exists but with a different domain (.onmicrosoft.com)
@@ -492,6 +522,129 @@ document.addEventListener('DOMContentLoaded', () => {
                     hideLoader();
                     showToast('Error updating resource account: ' + (error as Error).message, true);
                 }
+            });
+        }
+
+        // Setup Password Reset functionality
+        if (resetPasswordBtn && upnInput && passwordSuccessMessage) {
+            resetPasswordBtn.addEventListener('click', async () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                
+                showLoader();
+                const loaderText = document.getElementById('loaderText');
+                if (loaderText) loaderText.textContent = 'Resetting account password...';
+                
+                try {
+                    const result = await ipcRenderer.invoke('reset-account-password', upn);
+                    
+                    hideLoader();
+                    
+                    if (result.success) {
+                        // Show success message
+                        if (passwordSuccessMessage) {
+                            passwordSuccessMessage.textContent = "Password reset to generic password successfully";
+                            passwordSuccessMessage.classList.remove('hidden');
+                        }
+                        showToast('Password reset successful', false);
+                        
+                        // Update password status indicator
+                        if (passwordStatusIndicator && passwordStatusText) {
+                            passwordStatusIndicator.className = 'indicator success';
+                            passwordStatusText.textContent = "Password set to generic password";
+                        }
+                    } else {
+                        showToast(result.error || 'Failed to reset password', true);
+                    }
+                } catch (error) {
+                    hideLoader();
+                    showToast('Error resetting password: ' + (error as Error).message, true);
+                }
+            });
+        }
+
+        // Setup Group Membership functionality
+        // Add to MTR Group button (in License Management section)
+        const addToMtrBtn = document.getElementById('addToMtrBtn');
+        if (addToMtrBtn && upnInput) {
+            addToMtrBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                addToMtrGroup(upn);
+            });
+        }
+        
+        // Remove from MTR Group button (in License Management section)
+        const removeFromMtrBtn = document.getElementById('removeFromMtrBtn');
+        if (removeFromMtrBtn && upnInput) {
+            removeFromMtrBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                removeFromMtrGroup(upn);
+            });
+        }
+        
+        // Add to MTR Group button (in Account Status section)
+        const addToMtrStatusBtn = document.getElementById('addToMtrStatusBtn');
+        if (addToMtrStatusBtn && upnInput) {
+            addToMtrStatusBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                addToMtrGroup(upn);
+                // This will also update the status in the account section
+            });
+        }
+        
+        // Remove from MTR Group button (in Account Status section)
+        const removeFromMtrStatusBtn = document.getElementById('removeFromMtrStatusBtn');
+        if (removeFromMtrStatusBtn && upnInput) {
+            removeFromMtrStatusBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                removeFromMtrGroup(upn);
+                // This will also update the status in the account section
+            });
+        }
+        
+        // Add to Room Group button
+        const addToRoomBtn = document.getElementById('addToRoomBtn');
+        if (addToRoomBtn && upnInput) {
+            addToRoomBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                addToRoomGroup(upn);
+            });
+        }
+        
+        // Remove from Room Group button
+        const removeFromRoomBtn = document.getElementById('removeFromRoomBtn');
+        if (removeFromRoomBtn && upnInput) {
+            removeFromRoomBtn.addEventListener('click', () => {
+                const upn = (upnInput as HTMLInputElement).dataset.foundUpn || (upnInput as HTMLInputElement).value.trim();
+                if (!upn) {
+                    showToast('Resource account not found', true);
+                    return;
+                }
+                removeFromRoomGroup(upn);
             });
         }
 
@@ -608,9 +761,488 @@ function resetAccountForm() {
         updateSuccessMessage.classList.add('hidden');
     }
     
+    // Hide password section
+    const accountPasswordSection = document.getElementById('accountPasswordSection');
+    if (accountPasswordSection) {
+        accountPasswordSection.classList.add('hidden');
+    }
+    
+    // Reset password status
+    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
+    const passwordStatusText = document.getElementById('passwordStatusText');
+    if (passwordStatusIndicator && passwordStatusText) {
+        passwordStatusIndicator.className = 'indicator';
+        passwordStatusText.textContent = 'Not verified';
+    }
+    
+    // Hide password success message
+    const passwordSuccessMessage = document.getElementById('passwordSuccessMessage');
+    if (passwordSuccessMessage) {
+        passwordSuccessMessage.classList.add('hidden');
+    }
+    
+    // Hide license section
+    const licensesSection = document.getElementById('licensesSection');
+    if (licensesSection) {
+        licensesSection.classList.add('hidden');
+    }
+    
+    // Hide account status section
+    const accountStatusSection = document.getElementById('accountStatusSection');
+    if (accountStatusSection) {
+        accountStatusSection.classList.add('hidden');
+    }
+    
     // Re-enable check button (but disabled since no input)
     const checkUpnBtn = document.getElementById('checkUpnBtn') as HTMLButtonElement;
     if (checkUpnBtn) {
         checkUpnBtn.disabled = true;
+    }
+}
+
+// Function to verify password status
+async function verifyPasswordStatus(upn: string) {
+    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
+    const passwordStatusText = document.getElementById('passwordStatusText');
+    
+    if (!passwordStatusIndicator || !passwordStatusText) return;
+    
+    try {
+        // Set to loading state
+        passwordStatusIndicator.className = 'indicator';
+        passwordStatusText.textContent = 'Verifying password...';
+        
+        const result = await ipcRenderer.invoke('verify-account-password', upn);
+        
+        if (result.success) {
+            if (result.isValid) {
+                passwordStatusIndicator.className = 'indicator success';
+                passwordStatusText.textContent = result.message;
+            } else {
+                passwordStatusIndicator.className = 'indicator error';
+                passwordStatusText.textContent = result.message;
+                // Only show toast for error
+                showToast('Password verification failed', true);
+            }
+        } else {
+            passwordStatusIndicator.className = 'indicator error';
+            passwordStatusText.textContent = result.error || 'Failed to verify password';
+            showToast(result.error || 'Failed to verify password', true);
+        }
+    } catch (error) {
+        passwordStatusIndicator.className = 'indicator error';
+        passwordStatusText.textContent = 'Error: ' + (error as Error).message;
+        showToast('Failed to verify password status: ' + (error as Error).message, true);
+    }
+}
+
+async function resetPassword(upn: string) {
+    const resetPasswordBtn = document.getElementById('resetPasswordBtn') as HTMLButtonElement;
+    const passwordSuccessMessage = document.getElementById('passwordSuccessMessage');
+    
+    if (!resetPasswordBtn || !passwordSuccessMessage) return;
+    
+    try {
+        // Disable button and show loading state
+        resetPasswordBtn.disabled = true;
+        resetPasswordBtn.textContent = 'Resetting...';
+        
+        const result = await ipcRenderer.invoke('reset-account-password', upn);
+        
+        // Reset button state
+        resetPasswordBtn.disabled = false;
+        resetPasswordBtn.textContent = 'Reset to Generic Password';
+        
+        if (result.success) {
+            // Show success message
+            passwordSuccessMessage.textContent = 'Password has been reset to the generic password';
+            passwordSuccessMessage.classList.remove('hidden');
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                passwordSuccessMessage.classList.add('hidden');
+            }, 5000);
+            
+            // Verify password status again to update the indicator
+            verifyPasswordStatus(upn);
+            
+            showToast('Password reset successfully', false);
+        } else {
+            showToast(result.error || 'Failed to reset password', true);
+        }
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        
+        // Reset button state
+        resetPasswordBtn.disabled = false;
+        resetPasswordBtn.textContent = 'Reset to Generic Password';
+        
+        showToast(`Failed to reset password: ${(error as Error).message}`, true);
+    }
+}
+
+// Function to check and update account status indicators
+async function checkAccountStatus(upn: string) {
+    // Check account unlock status
+    await checkAccountUnlockStatus(upn);
+    
+    // Check group memberships
+    await checkGroupMemberships(upn);
+}
+
+// Function to check if account is unlocked
+async function checkAccountUnlockStatus(upn: string) {
+    const accountLockedIndicator = document.getElementById('accountLockedIndicator');
+    
+    if (!accountLockedIndicator) return;
+    
+    try {
+        // Set to loading state
+        accountLockedIndicator.className = 'indicator small';
+        
+        const result = await ipcRenderer.invoke('check-account-unlock', upn);
+        
+        if (result.success) {
+            if (result.isUnlocked) {
+                accountLockedIndicator.className = 'indicator small success';
+            } else {
+                accountLockedIndicator.className = 'indicator small error';
+            }
+        } else {
+            accountLockedIndicator.className = 'indicator small error';
+            showToast(result.error || 'Failed to check account unlock status', true);
+        }
+    } catch (error) {
+        accountLockedIndicator.className = 'indicator small error';
+        showToast('Error checking account unlock status: ' + (error as Error).message, true);
+    }
+}
+
+// Function to check and update all group memberships
+async function checkGroupMemberships(upn: string) {
+    // Check MTR group membership
+    await checkMtrGroupMembership(upn);
+    
+    // Check Room group membership
+    await checkRoomGroupMembership(upn);
+}
+
+// Function to check MTR group membership
+async function checkMtrGroupMembership(upn: string) {
+    const mtrGroupIndicator = document.getElementById('mtrGroupIndicator');
+    const addToMtrBtn = document.getElementById('addToMtrBtn') as HTMLButtonElement;
+    const removeFromMtrBtn = document.getElementById('removeFromMtrBtn') as HTMLButtonElement;
+    
+    // Status section indicators
+    const resourceGroupIndicator = document.getElementById('resourceGroupIndicator');
+    const addToMtrStatusBtn = document.getElementById('addToMtrStatusBtn') as HTMLButtonElement;
+    const removeFromMtrStatusBtn = document.getElementById('removeFromMtrStatusBtn') as HTMLButtonElement;
+    
+    if (!mtrGroupIndicator || !addToMtrBtn || !removeFromMtrBtn) return;
+    
+    try {
+        // Set to loading state
+        mtrGroupIndicator.className = 'indicator small';
+        addToMtrBtn.disabled = true;
+        removeFromMtrBtn.disabled = true;
+        
+        // Also set status section to loading if available
+        if (resourceGroupIndicator) {
+            resourceGroupIndicator.className = 'indicator small';
+        }
+        
+        if (addToMtrStatusBtn) {
+            addToMtrStatusBtn.disabled = true;
+        }
+        
+        if (removeFromMtrStatusBtn) {
+            removeFromMtrStatusBtn.disabled = true;
+        }
+        
+        const result = await ipcRenderer.invoke('check-group-membership', upn);
+        
+        if (result.success) {
+            if (result.isMember) {
+                // Update license section indicators
+                mtrGroupIndicator.className = 'indicator small success';
+                addToMtrBtn.disabled = true;
+                removeFromMtrBtn.disabled = false;
+                
+                // Update status section indicators if available
+                if (resourceGroupIndicator) {
+                    resourceGroupIndicator.className = 'indicator small success';
+                }
+                
+                if (addToMtrStatusBtn) {
+                    addToMtrStatusBtn.disabled = true;
+                }
+                
+                if (removeFromMtrStatusBtn) {
+                    removeFromMtrStatusBtn.disabled = false;
+                }
+            } else {
+                // Update license section indicators
+                mtrGroupIndicator.className = 'indicator small error';
+                addToMtrBtn.disabled = false;
+                removeFromMtrBtn.disabled = true;
+                
+                // Update status section indicators if available
+                if (resourceGroupIndicator) {
+                    resourceGroupIndicator.className = 'indicator small error';
+                }
+                
+                if (addToMtrStatusBtn) {
+                    addToMtrStatusBtn.disabled = false;
+                }
+                
+                if (removeFromMtrStatusBtn) {
+                    removeFromMtrStatusBtn.disabled = true;
+                }
+            }
+        } else {
+            // Update license section indicators
+            mtrGroupIndicator.className = 'indicator small error';
+            addToMtrBtn.disabled = true;
+            removeFromMtrBtn.disabled = true;
+            
+            // Update status section indicators if available
+            if (resourceGroupIndicator) {
+                resourceGroupIndicator.className = 'indicator small error';
+            }
+            
+            if (addToMtrStatusBtn) {
+                addToMtrStatusBtn.disabled = true;
+            }
+            
+            if (removeFromMtrStatusBtn) {
+                removeFromMtrStatusBtn.disabled = true;
+            }
+            
+            showToast(result.error || 'Failed to check MTR group membership', true);
+        }
+    } catch (error) {
+        // Update license section indicators
+        mtrGroupIndicator.className = 'indicator small error';
+        addToMtrBtn.disabled = true;
+        removeFromMtrBtn.disabled = true;
+        
+        // Update status section indicators if available
+        if (resourceGroupIndicator) {
+            resourceGroupIndicator.className = 'indicator small error';
+        }
+        
+        if (addToMtrStatusBtn) {
+            addToMtrStatusBtn.disabled = true;
+        }
+        
+        if (removeFromMtrStatusBtn) {
+            removeFromMtrStatusBtn.disabled = true;
+        }
+        
+        showToast('Error checking MTR group membership: ' + (error as Error).message, true);
+    }
+}
+
+// Function to check Room group membership
+async function checkRoomGroupMembership(upn: string) {
+    const roomGroupIndicator = document.getElementById('roomGroupIndicator');
+    const addToRoomBtn = document.getElementById('addToRoomBtn') as HTMLButtonElement;
+    const removeFromRoomBtn = document.getElementById('removeFromRoomBtn') as HTMLButtonElement;
+    
+    if (!roomGroupIndicator || !addToRoomBtn || !removeFromRoomBtn) return;
+    
+    try {
+        // Set to loading state
+        roomGroupIndicator.className = 'indicator small';
+        addToRoomBtn.disabled = true;
+        removeFromRoomBtn.disabled = true;
+        
+        const result = await ipcRenderer.invoke('check-room-membership', upn);
+        
+        if (result.success) {
+            if (result.isMember) {
+                roomGroupIndicator.className = 'indicator small success';
+                addToRoomBtn.disabled = true;
+                removeFromRoomBtn.disabled = false;
+            } else {
+                roomGroupIndicator.className = 'indicator small error';
+                addToRoomBtn.disabled = false;
+                removeFromRoomBtn.disabled = true;
+            }
+        } else {
+            roomGroupIndicator.className = 'indicator small error';
+            addToRoomBtn.disabled = true;
+            removeFromRoomBtn.disabled = true;
+            showToast(result.error || 'Failed to check Room group membership', true);
+        }
+    } catch (error) {
+        roomGroupIndicator.className = 'indicator small error';
+        addToRoomBtn.disabled = true;
+        removeFromRoomBtn.disabled = true;
+        showToast('Error checking Room group membership: ' + (error as Error).message, true);
+    }
+}
+
+// Function to add user to MTR group
+async function addToMtrGroup(upn: string) {
+    const addToMtrBtn = document.getElementById('addToMtrBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    
+    if (!addToMtrBtn || !licenseSuccessMessage) return;
+    
+    try {
+        // Disable button and show loading state
+        addToMtrBtn.disabled = true;
+        addToMtrBtn.textContent = 'Adding...';
+        
+        const result = await ipcRenderer.invoke('add-to-mtr-group', upn);
+        
+        // Reset button state
+        addToMtrBtn.textContent = 'Add';
+        
+        if (result.success) {
+            licenseSuccessMessage.textContent = result.message;
+            licenseSuccessMessage.classList.remove('hidden');
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                licenseSuccessMessage.classList.add('hidden');
+            }, 5000);
+            
+            // Refresh membership status
+            checkMtrGroupMembership(upn);
+            
+            showToast('Added to MTR Resource Accounts group', false);
+        } else {
+            addToMtrBtn.disabled = false;
+            showToast(result.error || 'Failed to add to MTR group', true);
+        }
+    } catch (error) {
+        addToMtrBtn.disabled = false;
+        addToMtrBtn.textContent = 'Add';
+        showToast('Error adding to MTR group: ' + (error as Error).message, true);
+    }
+}
+
+// Function to remove user from MTR group
+async function removeFromMtrGroup(upn: string) {
+    const removeFromMtrBtn = document.getElementById('removeFromMtrBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    
+    if (!removeFromMtrBtn || !licenseSuccessMessage) return;
+    
+    try {
+        // Disable button and show loading state
+        removeFromMtrBtn.disabled = true;
+        removeFromMtrBtn.textContent = 'Removing...';
+        
+        const result = await ipcRenderer.invoke('remove-from-mtr-group', upn);
+        
+        // Reset button state
+        removeFromMtrBtn.textContent = 'Remove';
+        
+        if (result.success) {
+            licenseSuccessMessage.textContent = result.message;
+            licenseSuccessMessage.classList.remove('hidden');
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                licenseSuccessMessage.classList.add('hidden');
+            }, 5000);
+            
+            // Refresh membership status
+            checkMtrGroupMembership(upn);
+            
+            showToast('Removed from MTR Resource Accounts group', false);
+        } else {
+            removeFromMtrBtn.disabled = false;
+            showToast(result.error || 'Failed to remove from MTR group', true);
+        }
+    } catch (error) {
+        removeFromMtrBtn.disabled = false;
+        removeFromMtrBtn.textContent = 'Remove';
+        showToast('Error removing from MTR group: ' + (error as Error).message, true);
+    }
+}
+
+// Function to add user to Room group
+async function addToRoomGroup(upn: string) {
+    const addToRoomBtn = document.getElementById('addToRoomBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    
+    if (!addToRoomBtn || !licenseSuccessMessage) return;
+    
+    try {
+        // Disable button and show loading state
+        addToRoomBtn.disabled = true;
+        addToRoomBtn.textContent = 'Adding...';
+        
+        const result = await ipcRenderer.invoke('add-to-room-group', upn);
+        
+        // Reset button state
+        addToRoomBtn.textContent = 'Add';
+        
+        if (result.success) {
+            licenseSuccessMessage.textContent = result.message;
+            licenseSuccessMessage.classList.remove('hidden');
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                licenseSuccessMessage.classList.add('hidden');
+            }, 5000);
+            
+            // Refresh membership status
+            checkRoomGroupMembership(upn);
+            
+            showToast('Added to Room Accounts group', false);
+        } else {
+            addToRoomBtn.disabled = false;
+            showToast(result.error || 'Failed to add to Room group', true);
+        }
+    } catch (error) {
+        addToRoomBtn.disabled = false;
+        addToRoomBtn.textContent = 'Add';
+        showToast('Error adding to Room group: ' + (error as Error).message, true);
+    }
+}
+
+// Function to remove user from Room group
+async function removeFromRoomGroup(upn: string) {
+    const removeFromRoomBtn = document.getElementById('removeFromRoomBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    
+    if (!removeFromRoomBtn || !licenseSuccessMessage) return;
+    
+    try {
+        // Disable button and show loading state
+        removeFromRoomBtn.disabled = true;
+        removeFromRoomBtn.textContent = 'Removing...';
+        
+        const result = await ipcRenderer.invoke('remove-from-room-group', upn);
+        
+        // Reset button state
+        removeFromRoomBtn.textContent = 'Remove';
+        
+        if (result.success) {
+            licenseSuccessMessage.textContent = result.message;
+            licenseSuccessMessage.classList.remove('hidden');
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                licenseSuccessMessage.classList.add('hidden');
+            }, 5000);
+            
+            // Refresh membership status
+            checkRoomGroupMembership(upn);
+            
+            showToast('Removed from Room Accounts group', false);
+        } else {
+            removeFromRoomBtn.disabled = false;
+            showToast(result.error || 'Failed to remove from Room group', true);
+        }
+    } catch (error) {
+        removeFromRoomBtn.disabled = false;
+        removeFromRoomBtn.textContent = 'Remove';
+        showToast('Error removing from Room group: ' + (error as Error).message, true);
     }
 } 

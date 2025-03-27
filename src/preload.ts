@@ -27,7 +27,16 @@ contextBridge.exposeInMainWorld(
                     'provision-intune',
                     'create-resource-account',
                     'check-resource-account',
-                    'update-resource-account'
+                    'update-resource-account',
+                    'verify-account-password',
+                    'reset-account-password',
+                    'check-account-unlock',
+                    'check-group-membership',
+                    'check-room-membership',
+                    'add-to-mtr-group',
+                    'remove-from-mtr-group',
+                    'add-to-room-group',
+                    'remove-from-room-group'
                 ];
                 if (validChannels.includes(channel)) {
                     return ipcRenderer.invoke(channel, ...args);
