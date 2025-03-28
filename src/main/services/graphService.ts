@@ -115,6 +115,10 @@ class GraphService {
     public async removeUserFromProGroup(upn: string) {
         return await this.groupService.removeUserFromProGroup(upn);
     }
+
+    public async getDiagnosticInfo() {
+        return await this.groupService.getDiagnosticInfo();
+    }
 }
 
 export { GraphService, DeviceType, DeviceInfo };

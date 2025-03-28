@@ -20,10 +20,44 @@ export class GroupService extends GraphBaseService {
     public async checkGroupMembership(userId: string, groupId: string): Promise<boolean> {
         try {
             const client = await this.getClient();
-            const result = await client.api(`https://graph.microsoft.com/beta/users/${userId}/memberOf`)
-                .filter(`id eq '${groupId}'`)
+            
+            // First get the user's ID if userId is a UPN
+            let userObjectId = userId;
+            if (userId.includes('@')) {
+                try {
+                    const user = await client.api(`/users/${userId}`)
+                        .select('id')
+                        .get();
+                    userObjectId = user.id;
+                } catch (error) {
+                    logger.error(`Error retrieving user ID for UPN ${userId}:`, error);
+                    return false;
+                }
+            }
+            
+            // Get the actual group ID from environment variables if a placeholder is used
+            let actualGroupId = groupId;
+            if (groupId === 'mtr-group-id') {
+                actualGroupId = process.env['MTR-ResourceAccountsID'] || '';
+            } else if (groupId === 'room-group-id') {
+                actualGroupId = process.env.SHARED_GROUP_ID || '';
+            } else if (groupId === 'pro-group-id') {
+                actualGroupId = process.env.PRO_GROUP_ID || '';
+            }
+            
+            if (!actualGroupId) {
+                logger.error(`Group ID not found for ${groupId}`);
+                return false;
+            }
+            
+            // Instead of using memberOf with filter which is problematic,
+            // directly check if the user is in the group's members list
+            const response = await client.api(`/groups/${actualGroupId}/members`)
+                .select('id')
                 .get();
-            return result.value.length > 0;
+                
+            const members = response.value;
+            return members.some((member: any) => member.id === userObjectId);
         } catch (error) {
             logger.error('Error checking group membership:', error);
             return false;
@@ -56,7 +90,7 @@ export class GroupService extends GraphBaseService {
                 .select('id')
                 .get();
             
-            if (!user) {
+            if (!user || !user.id) {
                 return {
                     isMember: false,
                     message: "Account not found"
@@ -65,7 +99,7 @@ export class GroupService extends GraphBaseService {
             
             // Get MTR Resource Account group ID from environment variables
             const groupName = 'MTR Resource Accounts';
-            const groupId = process.env.MTR_RecourceAccountsID;
+            const groupId = process.env['MTR-ResourceAccountsID'];
             
             if (!groupId) {
                 logger.error('MTR Resource Accounts group ID not found in environment variables');
@@ -75,16 +109,18 @@ export class GroupService extends GraphBaseService {
                 };
             }
             
-            // Check if user is a member of the group
+            // Use the more reliable method to check membership
             try {
-                const isMember = await client.api(`/groups/${groupId}/members`)
-                    .filter(`id eq '${user.id}'`)
-                    .count(true)
+                // Get all members of the group
+                const response = await client.api(`/groups/${groupId}/members`)
+                    .select('id')
                     .get();
                 
-                const count = isMember["@odata.count"];
+                // Check if user is in the list
+                const members = response.value;
+                const isMember = members.some((member: any) => member.id === user.id);
                 
-                if (count > 0) {
+                if (isMember) {
                     return {
                         isMember: true,
                         message: `Member of ${groupName}`
@@ -96,7 +132,7 @@ export class GroupService extends GraphBaseService {
                     };
                 }
             } catch (error) {
-                logger.error('Error checking group membership:', error);
+                logger.error('Error checking MTR group membership:', error);
                 return {
                     isMember: false,
                     message: `Error checking ${groupName} membership`
@@ -124,7 +160,7 @@ export class GroupService extends GraphBaseService {
                 .select('id')
                 .get();
             
-            if (!user) {
+            if (!user || !user.id) {
                 return {
                     isMember: false,
                     message: "Account not found"
@@ -143,16 +179,18 @@ export class GroupService extends GraphBaseService {
                 };
             }
             
-            // Check if user is a member of the group
+            // Use the more reliable method to check membership
             try {
-                const isMember = await client.api(`/groups/${groupId}/members`)
-                    .filter(`id eq '${user.id}'`)
-                    .count(true)
+                // Get all members of the group
+                const response = await client.api(`/groups/${groupId}/members`)
+                    .select('id')
                     .get();
                 
-                const count = isMember["@odata.count"];
+                // Check if user is in the list
+                const members = response.value;
+                const isMember = members.some((member: any) => member.id === user.id);
                 
-                if (count > 0) {
+                if (isMember) {
                     return {
                         isMember: true,
                         message: `Member of ${groupName}`
@@ -192,7 +230,7 @@ export class GroupService extends GraphBaseService {
                 .select('id')
                 .get();
             
-            if (!user) {
+            if (!user || !user.id) {
                 return {
                     isMember: false,
                     message: "Account not found"
@@ -211,16 +249,18 @@ export class GroupService extends GraphBaseService {
                 };
             }
             
-            // Check if user is a member of the group
+            // Use the more reliable method to check membership
             try {
-                const isMember = await client.api(`/groups/${groupId}/members`)
-                    .filter(`id eq '${user.id}'`)
-                    .count(true)
+                // Get all members of the group
+                const response = await client.api(`/groups/${groupId}/members`)
+                    .select('id')
                     .get();
                 
-                const count = isMember["@odata.count"];
+                // Check if user is in the list
+                const members = response.value;
+                const isMember = members.some((member: any) => member.id === user.id);
                 
-                if (count > 0) {
+                if (isMember) {
                     return {
                         isMember: true,
                         message: `Member of ${groupName}`
@@ -269,7 +309,7 @@ export class GroupService extends GraphBaseService {
             
             // Get MTR group ID from environment variables
             const groupName = 'MTR Resource Accounts';
-            const groupId = process.env.MTR_RecourceAccountsID;
+            const groupId = process.env['MTR-ResourceAccountsID'];
             
             if (!groupId) {
                 logger.error('MTR Resource Accounts group ID not found in environment variables');
@@ -329,7 +369,7 @@ export class GroupService extends GraphBaseService {
             
             // Get MTR group ID from environment variables
             const groupName = 'MTR Resource Accounts';
-            const groupId = process.env.MTR_RecourceAccountsID;
+            const groupId = process.env['MTR-ResourceAccountsID'];
             
             if (!groupId) {
                 logger.error('MTR Resource Accounts group ID not found in environment variables');
@@ -599,5 +639,17 @@ export class GroupService extends GraphBaseService {
                 message: `Error: ${(error as Error).message}`
             };
         }
+    }
+
+    /**
+     * Get diagnostic information about the group service configuration
+     * This is useful for debugging group membership issues
+     */
+    public async getDiagnosticInfo(): Promise<any> {
+        return {
+            mtrGroupId: process.env['MTR-ResourceAccountsID'] || 'not set',
+            sharedGroupId: process.env.SHARED_GROUP_ID || 'not set',
+            proGroupId: process.env.PRO_GROUP_ID || 'not set'
+        };
     }
 } 

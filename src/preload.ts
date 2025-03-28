@@ -39,7 +39,8 @@ contextBridge.exposeInMainWorld(
                     'remove-from-room-group',
                     'check-pro-membership',
                     'add-to-pro-group',
-                    'remove-from-pro-group'
+                    'remove-from-pro-group',
+                    'group-diagnostic'
                 ];
                 if (validChannels.includes(channel)) {
                     return ipcRenderer.invoke(channel, ...args);

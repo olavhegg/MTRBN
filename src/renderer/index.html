@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
     <title>MTR Setup Assistant</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -97,98 +98,102 @@
 
             <!-- Resource Account Tab -->
             <div class="tab-content" id="account">
-                <form id="setupForm" class="setup-form">
-                    <div class="form-section">
-                        <h2>Check Resource Account</h2>
-                        <div class="form-group">
-                            <div class="requirements-note">
-                                <span class="requirement-icon">ℹ️</span>
-                                <span class="requirement-text">Enter the UPN (User Principal Name) to check if the resource account exists. The system will check both the original domain (e.g., room@testeuc.no) and the onmicrosoft.com domain (e.g., room@testeuc.onmicrosoft.com).</span>
-                            </div>
-                            <label for="upn">User Principal Name (UPN):</label>
-                            <div class="input-with-button">
-                                <input type="email" id="upn" required placeholder="e.g., room01@banenor.no">
-                                <button type="button" id="checkUpnBtn" class="check-btn" disabled>Check</button>
-                            </div>
-                            <small>Example: room01@banenor.no</small>
-                            <div class="validation-message" id="upnValidation"></div>
-                        </div>
-                        
-                        <div id="accountUpdateSection" class="account-update-section hidden">
+                <div class="resource-account-content">
+                    <form id="setupForm" class="setup-form">
+                        <div class="form-section">
+                            <h2>Check Resource Account</h2>
                             <div class="form-group">
-                                <label for="updateDisplayName">New Display Name:</label>
-                                <input type="text" id="updateDisplayName" required placeholder="Current display name">
-                                <small>Current display name will be shown here</small>
+                                <div class="requirements-note">
+                                    <span class="requirement-icon">ℹ️</span>
+                                    <span class="requirement-text">Enter the UPN (User Principal Name) to check if the resource account exists. The system will check both the original domain (e.g., room@testeuc.no) and the onmicrosoft.com domain (e.g., room@testeuc.onmicrosoft.com).</span>
+                                </div>
+                                <label for="upn">User Principal Name (UPN):</label>
+                                <div class="input-with-button">
+                                    <input type="email" id="upn" required placeholder="e.g., room01@banenor.no">
+                                    <button type="button" id="checkUpnBtn" class="check-btn" disabled>Check</button>
+                                </div>
+                                <small>Example: room01@banenor.no</small>
+                                <div class="validation-message" id="upnValidation"></div>
                             </div>
-                            <button type="button" id="updateAccountBtn" class="provision-btn">Update Display Name</button>
-                            <div id="updateSuccessMessage" class="permanent-success-message hidden"></div>
-                        </div>
-                        
-                        <!-- Account Status Section -->
-                        <div id="accountPasswordSection" class="account-section hidden">
-                            <h3>Account Status</h3>
-                            <div class="status-indicator">
-                                <div id="passwordStatusIndicator" class="indicator"></div>
-                                <span id="passwordStatusText">Not verified</span>
-                                <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
-                            </div>
-                            <div id="passwordSuccessMessage" class="action-success-message hidden"></div>
                             
-                            <!-- Account status items -->
-                            <div class="status-item">
+                            <div id="accountUpdateSection" class="account-update-section hidden">
+                                <div class="form-group">
+                                    <label for="updateDisplayName">Display Name:</label>
+                                    <div class="input-with-button">
+                                        <input type="text" id="updateDisplayName" required placeholder="Current display name">
+                                        <button type="button" id="updateAccountBtn" class="check-btn">Update</button>
+                                    </div>
+                                    <small>Current display name will be shown here</small>
+                                </div>
+                                <div id="updateSuccessMessage" class="permanent-success-message hidden"></div>
+                            </div>
+                            
+                            <!-- Account Status Section -->
+                            <div id="accountPasswordSection" class="account-section hidden">
+                                <h3>Account Status</h3>
                                 <div class="status-indicator">
-                                    <div id="accountLockedIndicator" class="indicator"></div>
-                                    <span>Account Unlocked</span>
+                                    <div id="passwordStatusIndicator" class="indicator"></div>
+                                    <span id="passwordStatusText">Not verified</span>
+                                    <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
                                 </div>
+                                <div id="passwordSuccessMessage" class="action-success-message hidden"></div>
+                                
+                                <!-- Account status items -->
+                                <div class="status-item">
+                                    <div class="status-indicator">
+                                        <div id="accountLockedIndicator" class="indicator"></div>
+                                        <span>Account Unlocked</span>
+                                    </div>
+                                </div>
+                                <div class="status-item license-item">
+                                    <div class="license-status">
+                                        <div id="resourceGroupIndicator" class="indicator"></div>
+                                        <span>MTR-Resource Accounts - Group Membership</span>
+                                    </div>
+                                    <div class="license-actions">
+                                        <button id="addToMtrStatusBtn" class="small-action-btn">Add</button>
+                                        <button id="removeFromMtrStatusBtn" class="small-action-btn">Remove</button>
+                                    </div>
+                                </div>
+                                <div class="license-note">Required for all meeting rooms. This group is mandatory for any Teams room account.</div>
                             </div>
-                            <div class="status-item license-item">
-                                <div class="license-status">
-                                    <div id="resourceGroupIndicator" class="indicator"></div>
-                                    <span>MTR-Resource Accounts - Group Membership</span>
+                            
+                            <!-- License Management Section -->
+                            <div id="licensesSection" class="account-section hidden">
+                                <h3>License Group Memberships</h3>
+                                <p>Group memberships determine what Microsoft Teams licenses and features are available to this account.</p>
+                                
+                                <div class="license-item">
+                                    <div class="license-status">
+                                        <div id="roomGroupIndicator" class="indicator"></div>
+                                        <span>MTR-Teams-Panel-License-Microsoft Teams Shared Devices</span>
+                                    </div>
+                                    <div class="license-actions">
+                                        <button id="addToRoomBtn" class="small-action-btn">Add</button>
+                                        <button id="removeFromRoomBtn" class="small-action-btn">Remove</button>
+                                    </div>
                                 </div>
-                                <div class="license-actions">
-                                    <button id="addToMtrStatusBtn" class="small-action-btn">Add</button>
-                                    <button id="removeFromMtrStatusBtn" class="small-action-btn">Remove</button>
+                                <div class="license-note">Required for Teams Shared Devices license. Required for all rooms without Rallybar.</div>
+                                
+                                <div class="license-item">
+                                    <div class="license-status">
+                                        <div id="proGroupIndicator" class="indicator"></div>
+                                        <span>MTR-Teams-Room-License-Teams Rooms Pro</span>
+                                    </div>
+                                    <div class="license-actions">
+                                        <button id="addToProBtn" class="small-action-btn">Add</button>
+                                        <button id="removeFromProBtn" class="small-action-btn">Remove</button>
+                                    </div>
                                 </div>
+                                <div class="license-note">Required for Teams Rooms Pro license. Required for all rooms with Rallybar.</div>
+                                
+                                <div id="licenseSuccessMessage" class="action-success-message hidden"></div>
                             </div>
-                            <div class="license-note">Required for all meeting rooms. This group is mandatory for any Teams room account.</div>
+                            
+                            <button id="resetAccountBtn" class="reset-btn">Check Another Account</button>
                         </div>
-                        
-                        <!-- License Management Section -->
-                        <div id="licensesSection" class="account-section hidden">
-                            <h3>License Group Memberships</h3>
-                            <p>Group memberships determine what Microsoft Teams licenses and features are available to this account.</p>
-                            
-                            <div class="license-item">
-                                <div class="license-status">
-                                    <div id="roomGroupIndicator" class="indicator"></div>
-                                    <span>MTR-Teams-Panel-License-Microsoft Teams Shared Devices</span>
-                                </div>
-                                <div class="license-actions">
-                                    <button id="addToRoomBtn" class="small-action-btn">Add</button>
-                                    <button id="removeFromRoomBtn" class="small-action-btn">Remove</button>
-                                </div>
-                            </div>
-                            <div class="license-note">Required for Teams Shared Devices license. Required for all rooms without Rallybar.</div>
-                            
-                            <div class="license-item">
-                                <div class="license-status">
-                                    <div id="proGroupIndicator" class="indicator"></div>
-                                    <span>MTR-Teams-Room-License-Teams Rooms Pro</span>
-                                </div>
-                                <div class="license-actions">
-                                    <button id="addToProBtn" class="small-action-btn">Add</button>
-                                    <button id="removeFromProBtn" class="small-action-btn">Remove</button>
-                                </div>
-                            </div>
-                            <div class="license-note">Required for Teams Rooms Pro license. Required for all rooms with Rallybar.</div>
-                            
-                            <div id="licenseSuccessMessage" class="action-success-message hidden"></div>
-                        </div>
-                        
-                        <button id="resetAccountBtn" class="reset-btn">Check Another Account</button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
             <div id="results" class="results hidden">
