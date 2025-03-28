@@ -131,9 +131,13 @@
                             <!-- Account Status Section -->
                             <div id="accountPasswordSection" class="account-section hidden">
                                 <h3>Account Status</h3>
+                                <div class="requirements-note">
+                                    <span class="requirement-icon">ℹ️</span>
+                                    <span class="requirement-text">Password management is only available for cloud accounts (UPN ending with onmicrosoft.com). For accounts with other domains, password changes must be done in your on-premises Active Directory.</span>
+                                </div>
                                 <div class="status-indicator">
                                     <div id="passwordStatusIndicator" class="indicator"></div>
-                                    <span id="passwordStatusText">Not verified</span>
+                                    <span id="passwordStatusText">Cloud account status</span>
                                     <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
                                 </div>
                                 <div id="passwordSuccessMessage" class="action-success-message hidden"></div>

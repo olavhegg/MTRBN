@@ -134,39 +134,6 @@ export function setupAccountHandlers() {
         }
     });
 
-    // Handler for verifying account password
-    ipcMain.handle('verify-account-password', async (_, upn) => {
-        try {
-            logger.info(`Verifying password for resource account: ${upn}`);
-            const graphService = GraphService.getInstance();
-            
-            // Check if the account exists
-            const existingAccount = await graphService.checkUser(upn);
-            
-            if (!existingAccount) {
-                return {
-                    success: false,
-                    error: `Resource account ${upn} not found`
-                };
-            }
-            
-            // Check the password (assuming you have a method for this)
-            const passwordStatus = await graphService.verifyUserPassword(upn);
-            
-            return {
-                success: true,
-                isValid: passwordStatus.isValid,
-                message: passwordStatus.message
-            };
-        } catch (error) {
-            logger.error('Error verifying account password:', error);
-            return {
-                success: false,
-                error: `Failed to verify account password: ${(error as Error).message || String(error)}`
-            };
-        }
-    });
-
     // Handler for resetting account password
     ipcMain.handle('reset-account-password', async (_, upn) => {
         try {

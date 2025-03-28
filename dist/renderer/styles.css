@@ -482,6 +482,13 @@ button {
     margin: 0;
 }
 
+#resetAccountBtn {
+    display: block;
+    margin: 1.5rem auto 0;
+    width: auto;
+    min-width: 200px;
+}
+
 /* Status indicators */
 .status-indicator {
     display: flex;
@@ -492,6 +499,7 @@ button {
     background-color: white;
     border: 1px solid #e9ecef;
     border-radius: 4px;
+    flex-wrap: wrap;
 }
 
 /* Indicator styles for all contexts */
@@ -522,6 +530,11 @@ button {
 
 .indicator.warning {
     background-color: #ff9800;
+    border-radius: 50%;
+}
+
+.indicator.info {
+    background-color: #2196F3;
     border-radius: 50%;
 }
 

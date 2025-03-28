@@ -1,5 +1,10 @@
 import { resetForm, checkSerialNumber, provisionDevice } from './deviceManagement.js';
-import { resetAccountForm, checkResourceAccount, updateResourceAccount, resetPassword } from './accountManagement.js';
+import { 
+    resetAccountForm, 
+    checkResourceAccount, 
+    updateResourceAccount, 
+    resetPassword
+} from './accountManagement.js';
 import { 
     addToMtrGroup, removeFromMtrGroup, 
     addToRoomGroup, removeFromRoomGroup, 
@@ -121,7 +126,10 @@ export function setupAccountHandlers(ipcRenderer: any) {
     // Check UPN button
     const checkUpnBtn = document.getElementById('checkUpnBtn');
     if (checkUpnBtn && upnInput) {
-        checkUpnBtn.addEventListener('click', async () => {
+        checkUpnBtn.addEventListener('click', async (event) => {
+            // Prevent default action to avoid navigation
+            event.preventDefault();
+            
             const upn = upnInput.value.trim();
             await checkResourceAccount(upn, ipcRenderer);
         });
@@ -130,13 +138,20 @@ export function setupAccountHandlers(ipcRenderer: any) {
     // Reset account button
     const resetAccountBtn = document.getElementById('resetAccountBtn');
     if (resetAccountBtn) {
-        resetAccountBtn.addEventListener('click', resetAccountForm);
+        resetAccountBtn.addEventListener('click', (event) => {
+            // Prevent default action to avoid navigation
+            event.preventDefault();
+            resetAccountForm();
+        });
     }
     
     // Update account button
     const updateAccountBtn = document.getElementById('updateAccountBtn');
     if (updateAccountBtn) {
-        updateAccountBtn.addEventListener('click', async () => {
+        updateAccountBtn.addEventListener('click', async (event) => {
+            // Prevent default action to avoid navigation
+            event.preventDefault();
+            
             const upn = upnInput.dataset.foundUpn || upnInput.value.trim();
             const updateDisplayName = document.getElementById('updateDisplayName') as HTMLInputElement;
             const newDisplayName = updateDisplayName ? updateDisplayName.value.trim() : '';
@@ -148,7 +163,10 @@ export function setupAccountHandlers(ipcRenderer: any) {
     // Reset password button
     const resetPasswordBtn = document.getElementById('resetPasswordBtn');
     if (resetPasswordBtn) {
-        resetPasswordBtn.addEventListener('click', async () => {
+        resetPasswordBtn.addEventListener('click', async (event) => {
+            // Prevent default action to avoid navigation
+            event.preventDefault();
+            
             const upn = upnInput.dataset.foundUpn || upnInput.value.trim();
             
             if (!upn) {

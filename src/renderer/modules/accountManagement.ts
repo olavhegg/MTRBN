@@ -212,49 +212,25 @@ export async function updateResourceAccount(upn: string, newDisplayName: string,
     }
 }
 
-// Function to verify password status
-export async function verifyPasswordStatus(upn: string, ipcRenderer: any) {
-    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
-    const passwordStatusText = document.getElementById('passwordStatusText');
-    
-    if (!passwordStatusIndicator || !passwordStatusText) return;
-    
-    try {
-        // Set to loading state
-        passwordStatusIndicator.className = 'indicator';
-        passwordStatusText.textContent = 'Verifying password...';
-        
-        const result = await ipcRenderer.invoke('verify-account-password', upn);
-        
-        if (result.success) {
-            if (result.isValid) {
-                passwordStatusIndicator.className = 'indicator success';
-                passwordStatusText.textContent = result.message;
-            } else {
-                passwordStatusIndicator.className = 'indicator error';
-                passwordStatusText.textContent = result.message;
-                // Only show toast for error
-                showToast('Password verification failed', true);
-            }
-        } else {
-            passwordStatusIndicator.className = 'indicator error';
-            passwordStatusText.textContent = result.error || 'Failed to verify password';
-            showToast(result.error || 'Failed to verify password', true);
-        }
-    } catch (error) {
-        passwordStatusIndicator.className = 'indicator error';
-        passwordStatusText.textContent = 'Error: ' + (error as Error).message;
-        showToast('Failed to verify password status: ' + (error as Error).message, true);
-    }
-}
-
 export async function resetPassword(upn: string, ipcRenderer: any) {
     const resetPasswordBtn = document.getElementById('resetPasswordBtn') as HTMLButtonElement;
     const passwordSuccessMessage = document.getElementById('passwordSuccessMessage');
+    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
+    const passwordStatusText = document.getElementById('passwordStatusText');
     
     if (!resetPasswordBtn || !passwordSuccessMessage) return;
     
     try {
+        // Check if UPN ends with onmicrosoft.com
+        if (!upn.toLowerCase().endsWith('onmicrosoft.com')) {
+            if (passwordStatusIndicator && passwordStatusText) {
+                passwordStatusIndicator.className = 'indicator warning';
+                passwordStatusText.textContent = 'Password reset is only available for cloud accounts. Changes for on-premises accounts must be done in on-premises Active Directory.';
+            }
+            showToast('Password reset only available for cloud accounts', false);
+            return;
+        }
+        
         // Disable button and show loading state
         resetPasswordBtn.disabled = true;
         resetPasswordBtn.textContent = 'Resetting...';
@@ -275,12 +251,27 @@ export async function resetPassword(upn: string, ipcRenderer: any) {
                 passwordSuccessMessage.classList.add('hidden');
             }, 5000);
             
-            // Verify password status again to update the indicator
-            verifyPasswordStatus(upn, ipcRenderer);
+            // Update the password status indicator
+            if (passwordStatusIndicator && passwordStatusText) {
+                passwordStatusIndicator.className = 'indicator success';
+                passwordStatusText.textContent = 'Password reset to generic password';
+            }
             
             showToast('Password reset successfully', false);
         } else {
-            showToast(result.error || 'Failed to reset password', true);
+            const errorMsg = result.error || 'Failed to reset password';
+            
+            // Use warning instead of error for permission issues
+            if (errorMsg.includes("doesn't have permission") || errorMsg.includes("Insufficient privileges")) {
+                showToast('Permission issue: The app needs User.ReadWrite.All permission in Azure AD', false);
+                
+                if (passwordStatusIndicator && passwordStatusText) {
+                    passwordStatusIndicator.className = 'indicator warning';
+                    passwordStatusText.textContent = 'Password reset requires User.ReadWrite.All permission in Azure AD';
+                }
+            } else {
+                showToast(errorMsg, true);
+            }
         }
     } catch (error) {
         console.error('Error resetting password:', error);
@@ -297,6 +288,20 @@ export async function resetPassword(upn: string, ipcRenderer: any) {
 export async function checkAccountStatus(upn: string, ipcRenderer: any) {
     // Check account unlock status
     await checkAccountUnlockStatus(upn, ipcRenderer);
+    
+    // Update password status indicator based on account type
+    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
+    const passwordStatusText = document.getElementById('passwordStatusText');
+    
+    if (passwordStatusIndicator && passwordStatusText) {
+        if (upn.toLowerCase().endsWith('onmicrosoft.com')) {
+            passwordStatusIndicator.className = 'indicator info';
+            passwordStatusText.textContent = 'Cloud account - password can be reset';
+        } else {
+            passwordStatusIndicator.className = 'indicator warning';
+            passwordStatusText.textContent = 'On-premises account - password must be managed in Active Directory';
+        }
+    }
     
     // Check group memberships
     await checkGroupMemberships(upn, ipcRenderer);

@@ -74,76 +74,6 @@ export class UserService extends GraphBaseService {
         }
     }
 
-    public async verifyUserPassword(upn: string): Promise<{ isValid: boolean; message: string }> {
-        try {
-            logger.info(`Verifying password for user: ${upn}`);
-            const genericPassword = process.env.GENERICPASSWORD;
-            
-            if (!genericPassword) {
-                return {
-                    isValid: false,
-                    message: "Generic password not defined in environment variables"
-                };
-            }
-            
-            // Since we cannot directly verify a password through Graph API,
-            // we need to make a more thorough check of account properties
-            try {
-                const user = await this.checkUser(upn);
-                
-                if (!user) {
-                    return {
-                        isValid: false,
-                        message: "Account not found"
-                    };
-                }
-                
-                if (!user.accountEnabled) {
-                    return {
-                        isValid: false,
-                        message: "Account is disabled"
-                    };
-                }
-                
-                // Check for specific properties that might indicate password status
-                // This is a best-effort approach since direct password verification is not possible
-                
-                // Check if user has passwordPolicies that match what we set for generic password
-                const hasExpectedPolicy = user.passwordPolicies && 
-                    user.passwordPolicies.includes('DisablePasswordExpiration');
-                    
-                // Check if user was recently created or reset password (within last day)
-                const recentlyModified = user.lastPasswordChangeDateTime ? 
-                    (new Date().getTime() - new Date(user.lastPasswordChangeDateTime).getTime()) < 86400000 : 
-                    false;
-                
-                if (hasExpectedPolicy || recentlyModified) {
-                    return {
-                        isValid: true,
-                        message: "Password appears to match generic password"
-                    };
-                }
-                
-                return {
-                    isValid: false,
-                    message: "Password likely does not match generic password"
-                };
-            } catch (error) {
-                logger.error('Error checking user for password verification:', error);
-                return {
-                    isValid: false,
-                    message: `Unable to verify: ${(error as Error).message}`
-                };
-            }
-        } catch (error) {
-            logger.error('Error verifying user password:', error);
-            return {
-                isValid: false,
-                message: `Error: ${(error as Error).message}`
-            };
-        }
-    }
-
     public async resetUserPassword(upn: string): Promise<any> {
         try {
             const client = await this.getClient();
@@ -161,20 +91,25 @@ export class UserService extends GraphBaseService {
                 throw new Error(`User ${upn} not found`);
             }
             
-            // Create password profile
+            // Create simplified password profile (based on example code)
             const passwordProfile = {
                 passwordProfile: {
                     password: genericPassword,
-                    forceChangePasswordNextSignIn: false,
-                    passwordPolicies: "DisablePasswordExpiration"
+                    forceChangePasswordNextSignIn: false
                 }
             };
             
             // Execute the password reset
-            const result = await client.api(`https://graph.microsoft.com/beta/users/${upn}`).patch(passwordProfile);
-            logger.info(`Password reset successful for ${upn}`);
-            
-            return result;
+            try {
+                const result = await client.api(`/users/${upn}`).version("beta").patch(passwordProfile);
+                logger.info(`Password reset successful for ${upn}`);
+                return result;
+            } catch (error) {
+                if (error instanceof Error && error.message.includes('Insufficient privileges')) {
+                    throw new Error("The application doesn't have permission to reset passwords. The app token requires User.ReadWrite.All permission with admin consent in Azure AD. Contact your administrator to grant these permissions.");
+                }
+                throw error;
+            }
         } catch (error) {
             logger.error('Error resetting user password:', error);
             throw error;

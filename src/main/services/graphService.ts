@@ -59,10 +59,6 @@ class GraphService {
         return await this.userService.updateUserDisplayName(upn, displayName);
     }
 
-    public async verifyUserPassword(upn: string) {
-        return await this.userService.verifyUserPassword(upn);
-    }
-
     public async resetUserPassword(upn: string) {
         return await this.userService.resetUserPassword(upn);
     }
