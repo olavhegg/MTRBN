@@ -5,9 +5,15 @@
   "main": "dist/main/index.js",
   "scripts": {
     "start": "electron .",
-    "build": "tsc && tsc -p tsconfig.renderer.json && cp src/renderer/index.html dist/renderer/ && cp src/renderer/styles.css dist/renderer/ && mkdir -p dist/renderer/modules && cp logitech.ico dist/",
-    "dev": "tsc -w & tsc -w -p tsconfig.renderer.json & electron .",
-    "clean": "rm -rf dist/* node_modules/.cache/* && mkdir -p dist/renderer dist/renderer/modules"
+    "build": "npm run clean && tsc && tsc -p tsconfig.renderer.json && npm run copy-assets",
+    "copy-assets": "node -e \"const fs=require('fs');const path=require('path');fs.cpSync('src/renderer/index.html', 'dist/renderer/index.html', {recursive: true});fs.cpSync('src/renderer/styles.css', 'dist/renderer/styles.css', {recursive: true});fs.mkdirSync('dist/renderer/modules', {recursive: true});fs.cpSync('logitech.ico', 'dist/logitech.ico', {recursive: true});fs.cpSync('Bane_NOR_logo.svg.png', 'dist/Bane_NOR_logo.svg.png', {recursive: true});\"",
+    "dev": "npm run clean && concurrently \"tsc -w\" \"tsc -w -p tsconfig.renderer.json\" \"electron .\"",
+    "dev:start": "npm run clean && npm run build && npm run start",
+    "clean": "rimraf dist/* && mkdir -p dist/renderer/modules",
+    "pack": "electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win"
   },
   "keywords": [
     "electron",
@@ -15,19 +21,52 @@
     "teams",
     "intune"
   ],
-  "author": "",
+  "author": "Bane NOR",
   "license": "ISC",
   "build": {
     "appId": "com.banenor.meetingroom",
+    "productName": "MTR Resource Account Manager",
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "icon": "Bane_NOR_logo.svg.png",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
     "win": {
       "target": [
         "nsis"
       ],
-      "icon": "build/icon.ico"
+      "icon": "logitech.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     }
   },
   "dependencies": {
@@ -45,6 +84,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "concurrently": "^8.2.2",
     "electron-builder": "^24.9.1",
     "electron-reloader": "^1.2.3",
     "rimraf": "^5.0.0",

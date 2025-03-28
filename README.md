@@ -121,13 +121,47 @@ MTR/
 
 - Node.js 16+ and npm
 - Microsoft Azure AD tenant with appropriate permissions
-- App registration in Azure AD with the following permissions:
-  - User.ReadWrite.All (for account management)
-  - Group.ReadWrite.All (for group membership management)
-  - Directory.ReadWrite.All (for tenant-wide operations)
-  - DeviceManagementServiceConfig.ReadWrite.All (for Intune operations)
-  - DeviceManagementConfiguration.ReadWrite.All (for Intune operations)
-  - DeviceManagementManagedDevices.ReadWrite.All (for Intune operations)
+- App registration in Azure AD (see detailed permissions below)
+
+### Azure AD App Registration Configuration
+
+For this application to function properly, you need to create an app registration in Azure Active Directory with the following configurations:
+
+1. **Authentication Type**: Client Credentials Flow (application permissions)
+2. **Token Configuration**: Add the Microsoft Graph API as the target audience
+
+#### Required API Permissions
+
+| Permission Name | Type | Description | Features Using This Permission |
+|-----------------|------|-------------|--------------------------------|
+| **User.ReadWrite.All** | Application | Read and write all user's profiles | - Check resource account existence<br>- Update display names<br>- Verify account status |
+| **User.Read.All** | Application | Read all user's profiles | - Basic account lookups<br>- Status checks |
+| **Group.ReadWrite.All** | Application | Read and write all groups | - Add/remove users from MTR Resource Accounts group<br>- Add/remove users from license groups<br>- Check group memberships |
+| **Group.Read.All** | Application | Read all groups | - View license group information<br>- Check group memberships |
+| **Directory.ReadWrite.All** | Application | Read and write directory data | - Required for tenant-wide operations<br>- Access to extended account properties |
+| **DeviceManagementServiceConfig.ReadWrite.All** | Application | Read and write Microsoft Intune service configurations | - Manage device registration in Intune<br>- Configure device settings |
+| **DeviceManagementConfiguration.ReadWrite.All** | Application | Read and write Microsoft Intune device configurations | - Set up device configurations<br>- Apply policy settings to MTR devices |
+| **DeviceManagementManagedDevices.ReadWrite.All** | Application | Read and write Microsoft Intune devices | - Register new devices by serial number<br>- Check existing device status |
+| **Organization.Read.All** | Application | Read organization information | - Access license information<br>- View tenant details |
+
+#### Setup Instructions for App Registration
+
+1. Sign in to the [Azure Portal](https://portal.azure.com)
+2. Navigate to "Azure Active Directory" > "App registrations"
+3. Click "New registration"
+4. Provide a name for your application (e.g., "MTR Resource Account Manager")
+5. Select "Accounts in this organizational directory only"
+6. No redirect URI is needed (leave blank)
+7. Click "Register"
+8. After creation, navigate to "API Permissions"
+9. Click "Add a permission" > "Microsoft Graph" > "Application permissions"
+10. Add all the permissions listed in the table above
+11. Click "Grant admin consent" (requires admin privileges)
+12. Navigate to "Certificates & secrets"
+13. Create a new client secret and note the value (this will be used in your .env file)
+14. Note the Application (client) ID and Directory (tenant) ID from the Overview page
+
+After setting up the app registration, update your `.env` file with the appropriate IDs and client secret.
 
 ## Installation and Setup
 
@@ -183,6 +217,40 @@ MTR/
   ```
   npx electron-builder --win
   ```
+
+## Building for Production
+
+This application can be packaged for both Windows and macOS platforms.
+
+### Building for All Platforms
+
+```bash
+npm run dist
+```
+
+### Building for Windows
+
+```bash
+npm run dist:win
+```
+
+This creates a Windows installer (NSIS) in the `release` directory.
+
+### Building for macOS
+
+```bash
+npm run dist:mac
+```
+
+This creates both a DMG installer and a ZIP archive in the `release` directory.
+
+### Development Packaging
+
+For testing the packaged app without creating installers:
+
+```bash
+npm run pack
+```
 
 ## Security Considerations
 
