@@ -11,6 +11,7 @@ export function resetForm() {
     const provisionSerialNumberInput = document.getElementById('provisionSerialNumber') as HTMLInputElement;
     const permanentSuccessMessage = document.getElementById('permanentSuccessMessage');
     const resetBtn = document.getElementById('resetBtn');
+    const provisionIntuneBtn = document.getElementById('provisionIntuneBtn');
     
     if (serialNumberInput) serialNumberInput.value = '';
     if (upnInput) upnInput.value = '';
@@ -20,6 +21,7 @@ export function resetForm() {
     if (checkSerialBtn) checkSerialBtn.disabled = true;
     if (permanentSuccessMessage) permanentSuccessMessage.classList.add('hidden');
     if (resetBtn) resetBtn.classList.add('hidden');
+    if (provisionIntuneBtn) provisionIntuneBtn.classList.remove('hidden');
     
     // Hide device setup section
     const deviceSetupSection = document.getElementById('deviceSetupSection');
@@ -63,7 +65,6 @@ export async function checkSerialNumber(serialNumber: string, ipcRenderer: any) 
                     validationElement.textContent = `Device ${serialNumber} is already provisioned in Intune with description: ${result.device.description}`;
                     validationElement.className = 'validation-message success';
                 }
-                showToast(`Device ${serialNumber} is already provisioned in Intune`, false);
                 
                 // Don't show device setup section if already provisioned
                 if (deviceSetupSection) {
@@ -126,9 +127,8 @@ export async function provisionDevice(serialNumber: string, description: string,
         // If device exists and is valid, show message and don't try to provision again
         if (checkResult.success && checkResult.exists) {
             hideLoader();
-            showToast(`Device ${serialNumber} is already provisioned in Intune`, false);
             
-            // Show permanent success message
+            // Show permanent success message only
             const permanentSuccessMessage = document.getElementById('permanentSuccessMessage');
             if (permanentSuccessMessage) {
                 permanentSuccessMessage.textContent = `Device ${serialNumber} is already provisioned in Intune`;
@@ -140,6 +140,13 @@ export async function provisionDevice(serialNumber: string, description: string,
             if (resetBtn) {
                 resetBtn.classList.remove('hidden');
             }
+            
+            // Hide provision button
+            const provisionIntuneBtn = document.getElementById('provisionIntuneBtn');
+            if (provisionIntuneBtn) {
+                provisionIntuneBtn.classList.add('hidden');
+            }
+            
             return;
         }
         
@@ -156,9 +163,7 @@ export async function provisionDevice(serialNumber: string, description: string,
         hideLoader();
         
         if (result.success) {
-            showToast(`Device ${serialNumber} successfully registered in Intune`, false);
-            
-            // Show permanent success message
+            // Show permanent success message only
             const permanentSuccessMessage = document.getElementById('permanentSuccessMessage');
             if (permanentSuccessMessage) {
                 permanentSuccessMessage.textContent = `Device ${serialNumber} successfully registered in Intune`;
@@ -169,6 +174,12 @@ export async function provisionDevice(serialNumber: string, description: string,
             const resetBtn = document.getElementById('resetBtn');
             if (resetBtn) {
                 resetBtn.classList.remove('hidden');
+            }
+            
+            // Hide provision button
+            const provisionIntuneBtn = document.getElementById('provisionIntuneBtn');
+            if (provisionIntuneBtn) {
+                provisionIntuneBtn.classList.add('hidden');
             }
         } else {
             showToast(result.error || 'Failed to provision device', true);

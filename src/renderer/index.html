@@ -56,6 +56,7 @@
                         <ul class="limitations-list">
                             <li>Cannot create new resource accounts</li>
                             <li>Cannot provision in Teams Admin Center or generate daily codes for devices</li>
+                            <li>Password management removed for security reasons - please use Microsoft Admin Center</li>
                         </ul>
                     </div>
                 </div>
@@ -90,9 +91,11 @@
                         <input type="text" id="description" required placeholder="Enter a description for this device">
                         <small>Example: Logitech Rallybar B260 S33</small>
                     </div>
-                    <button type="button" id="provisionIntuneBtn" class="provision-btn">Register in Intune</button>
                     <div id="permanentSuccessMessage" class="permanent-success-message hidden"></div>
-                    <button id="resetBtn" class="reset-btn">Setup Another Device</button>
+                    <div class="buttons-container">
+                        <button type="button" id="provisionIntuneBtn" class="provision-btn">Register in Intune</button>
+                        <button id="resetBtn" class="reset-btn hidden">Setup Another Device</button>
+                    </div>
                 </div>
             </div>
 
@@ -131,17 +134,6 @@
                             <!-- Account Status Section -->
                             <div id="accountPasswordSection" class="account-section hidden">
                                 <h3>Account Status</h3>
-                                <div class="requirements-note">
-                                    <span class="requirement-icon">ℹ️</span>
-                                    <span class="requirement-text">Password management is only available for cloud accounts (UPN ending with onmicrosoft.com). For accounts with other domains, password changes must be done in your on-premises Active Directory. This app cannot verify current passwords but can reset them to the generic default password.</span>
-                                </div>
-                                <div class="status-indicator">
-                                    <div id="passwordStatusIndicator" class="indicator"></div>
-                                    <span id="passwordStatusText">Cloud account status</span>
-                                    <button id="resetPasswordBtn" class="action-btn">Reset to Generic Password</button>
-                                </div>
-                                <div id="passwordSuccessMessage" class="action-success-message hidden"></div>
-                                
                                 <!-- Account status items -->
                                 <div class="status-item">
                                     <div class="status-indicator">
@@ -155,11 +147,12 @@
                                         <span>MTR-Resource Accounts - Group Membership</span>
                                     </div>
                                     <div class="license-actions">
-                                        <button id="addToMtrStatusBtn" class="small-action-btn">Add</button>
-                                        <button id="removeFromMtrStatusBtn" class="small-action-btn">Remove</button>
+                                        <button type="button" id="addToMtrStatusBtn" class="small-action-btn">Add</button>
+                                        <button type="button" id="removeFromMtrStatusBtn" class="small-action-btn">Remove</button>
                                     </div>
                                 </div>
                                 <div class="license-note">Required for all meeting rooms. This group is mandatory for any Teams room account.</div>
+                                <div id="mtrStatusSuccessMessage" class="action-success-message hidden"></div>
                             </div>
                             
                             <!-- License Management Section -->
@@ -167,14 +160,60 @@
                                 <h3>License Group Memberships</h3>
                                 <p>Group memberships determine what Microsoft Teams licenses and features are available to this account.</p>
                                 
+                                <!-- License information display -->
+                                <div class="license-info-section">
+                                    <div class="license-info-header">
+                                        <h4>Available Licenses</h4>
+                                        <button type="button" id="refreshLicensesBtn" class="refresh-btn" title="Refresh License Information">
+                                            <span>↻</span>
+                                        </button>
+                                    </div>
+                                    <div class="license-info-grid">
+                                        <div class="license-info-item">
+                                            <div class="license-info-name">Microsoft Teams Rooms Pro</div>
+                                            <div class="license-info-counts">
+                                                <div class="license-count">
+                                                    <span class="license-count-label">Total:</span>
+                                                    <span class="license-count-value" id="teamsRoomsProTotal">-</span>
+                                                </div>
+                                                <div class="license-count">
+                                                    <span class="license-count-label">Used:</span>
+                                                    <span class="license-count-value" id="teamsRoomsProUsed">-</span>
+                                                </div>
+                                                <div class="license-count">
+                                                    <span class="license-count-label">Available:</span>
+                                                    <span class="license-count-value" id="teamsRoomsProAvailable">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="license-info-item">
+                                            <div class="license-info-name">Microsoft Teams Shared Devices</div>
+                                            <div class="license-info-counts">
+                                                <div class="license-count">
+                                                    <span class="license-count-label">Total:</span>
+                                                    <span class="license-count-value" id="teamsSharedDevicesTotal">-</span>
+                                                </div>
+                                                <div class="license-count">
+                                                    <span class="license-count-label">Used:</span>
+                                                    <span class="license-count-value" id="teamsSharedDevicesUsed">-</span>
+                                                </div>
+                                                <div class="license-count">
+                                                    <span class="license-count-label">Available:</span>
+                                                    <span class="license-count-value" id="teamsSharedDevicesAvailable">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="license-item">
                                     <div class="license-status">
                                         <div id="roomGroupIndicator" class="indicator"></div>
                                         <span>MTR-Teams-Panel-License-Microsoft Teams Shared Devices</span>
                                     </div>
                                     <div class="license-actions">
-                                        <button id="addToRoomBtn" class="small-action-btn">Add</button>
-                                        <button id="removeFromRoomBtn" class="small-action-btn">Remove</button>
+                                        <button type="button" id="addToRoomBtn" class="small-action-btn">Add</button>
+                                        <button type="button" id="removeFromRoomBtn" class="small-action-btn">Remove</button>
                                     </div>
                                 </div>
                                 <div class="license-note">Required for Teams Shared Devices license. Required for all rooms without Rallybar.</div>
@@ -185,8 +224,8 @@
                                         <span>MTR-Teams-Room-License-Teams Rooms Pro</span>
                                     </div>
                                     <div class="license-actions">
-                                        <button id="addToProBtn" class="small-action-btn">Add</button>
-                                        <button id="removeFromProBtn" class="small-action-btn">Remove</button>
+                                        <button type="button" id="addToProBtn" class="small-action-btn">Add</button>
+                                        <button type="button" id="removeFromProBtn" class="small-action-btn">Remove</button>
                                     </div>
                                 </div>
                                 <div class="license-note">Required for Teams Rooms Pro license. Required for all rooms with Rallybar.</div>

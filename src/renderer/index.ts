@@ -6,7 +6,8 @@ import {
     setupAccountHandlers, 
     setupGroupHandlers, 
     setupTabNavigation,
-    setupQuitHandler
+    setupQuitHandler,
+    setupLicenseHandlers
 } from './modules/eventHandlers.js';
 
 // Status tracking
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupDeviceHandlers(ipcRenderer);
         setupAccountHandlers(ipcRenderer);
         setupGroupHandlers(ipcRenderer);
+        setupLicenseHandlers(ipcRenderer);
         setupQuitHandler(ipcRenderer);
 
         console.log('App initialized successfully');

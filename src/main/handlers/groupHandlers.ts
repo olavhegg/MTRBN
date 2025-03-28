@@ -369,4 +369,22 @@ export function setupGroupHandlers() {
             };
         }
     });
+
+    // Handler for license information
+    ipcMain.handle('get-license-info', async () => {
+        try {
+            logger.info('Getting license information');
+            const graphService = GraphService.getInstance();
+            
+            const result = await graphService.getLicenseInfo();
+            
+            return result;
+        } catch (error) {
+            logger.error('Error getting license information:', error);
+            return {
+                success: false,
+                error: `Failed to get license information: ${(error as Error).message || String(error)}`
+            };
+        }
+    });
 } 

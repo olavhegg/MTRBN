@@ -46,7 +46,7 @@ export class UserService extends GraphBaseService {
                 userPrincipalName: upn,
                 accountEnabled: true,
                 passwordProfile: {
-                    password: process.env.GENERICPASSWORD || 'ChangeMe123!',
+                    password: 'ChangeMe123!', // Hardcoded placeholder - password management removed from app
                     forceChangePasswordNextSignIn: false,
                     passwordPolicies: 'DisablePasswordExpiration'
                 }
@@ -70,48 +70,6 @@ export class UserService extends GraphBaseService {
             return await client.api(`https://graph.microsoft.com/beta/users/${upn}`).patch(user);
         } catch (error) {
             logger.error('Error updating user display name:', error);
-            throw error;
-        }
-    }
-
-    public async resetUserPassword(upn: string): Promise<any> {
-        try {
-            const client = await this.getClient();
-            const genericPassword = process.env.GENERICPASSWORD;
-            
-            if (!genericPassword) {
-                throw new Error("Generic password not defined in environment variables");
-            }
-            
-            logger.info(`Resetting password for user: ${upn}`);
-            
-            // First, check if user exists
-            const user = await this.checkUser(upn);
-            if (!user) {
-                throw new Error(`User ${upn} not found`);
-            }
-            
-            // Create simplified password profile (based on example code)
-            const passwordProfile = {
-                passwordProfile: {
-                    password: genericPassword,
-                    forceChangePasswordNextSignIn: false
-                }
-            };
-            
-            // Execute the password reset
-            try {
-                const result = await client.api(`/users/${upn}`).version("beta").patch(passwordProfile);
-                logger.info(`Password reset successful for ${upn}`);
-                return result;
-            } catch (error) {
-                if (error instanceof Error && error.message.includes('Insufficient privileges')) {
-                    throw new Error("The application doesn't have permission to reset passwords. The app token requires User.ReadWrite.All permission with admin consent in Azure AD. Contact your administrator to grant these permissions.");
-                }
-                throw error;
-            }
-        } catch (error) {
-            logger.error('Error resetting user password:', error);
             throw error;
         }
     }

@@ -134,38 +134,6 @@ export function setupAccountHandlers() {
         }
     });
 
-    // Handler for resetting account password
-    ipcMain.handle('reset-account-password', async (_, upn) => {
-        try {
-            logger.info(`Resetting password for resource account: ${upn}`);
-            const graphService = GraphService.getInstance();
-            
-            // Check if the account exists
-            const existingAccount = await graphService.checkUser(upn);
-            
-            if (!existingAccount) {
-                return {
-                    success: false,
-                    error: `Resource account ${upn} not found`
-                };
-            }
-            
-            // Reset the password
-            const result = await graphService.resetUserPassword(upn);
-            
-            return {
-                success: true,
-                message: `Password has been reset successfully`
-            };
-        } catch (error) {
-            logger.error('Error resetting account password:', error);
-            return {
-                success: false,
-                error: `Failed to reset account password: ${(error as Error).message || String(error)}`
-            };
-        }
-    });
-
     // Handler for checking account unlock status
     ipcMain.handle('check-account-unlock', async (_, upn) => {
         try {

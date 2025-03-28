@@ -59,10 +59,6 @@ class GraphService {
         return await this.userService.updateUserDisplayName(upn, displayName);
     }
 
-    public async resetUserPassword(upn: string) {
-        return await this.userService.resetUserPassword(upn);
-    }
-
     public async checkAccountUnlocked(upn: string) {
         return await this.userService.checkAccountUnlocked(upn);
     }
@@ -114,6 +110,94 @@ class GraphService {
 
     public async getDiagnosticInfo() {
         return await this.groupService.getDiagnosticInfo();
+    }
+
+    /**
+     * Gets license information for Microsoft Teams Rooms Pro and Microsoft Teams Shared Devices
+     */
+    public async getLicenseInfo(): Promise<{
+        success: boolean;
+        error?: string;
+        licenses?: {
+            teamsRoomsPro: {
+                total: number;
+                used: number;
+                available: number;
+            };
+            teamsSharedDevices: {
+                total: number;
+                used: number;
+                available: number;
+            };
+        };
+    }> {
+        try {
+            const client = await this.groupService.getClient();
+            
+            // Get all subscribed SKUs
+            const response = await client.api('/subscribedSkus')
+                .get();
+            
+            // Teams Rooms Pro and Teams Shared Devices service plan IDs
+            // Note: These IDs might need adjustment based on actual SKU IDs in the tenant
+            const teamsRoomsProSkuId = '4bfd1bba-80ef-4d97-b412-cae9fce26935'; // Teams Rooms Pro
+            const teamsSharedDevicesSkuId = '82023f10-53c7-4e1a-a6a1-4cf5855e05bd'; // Teams Shared Devices
+            
+            let teamsRoomsProInfo = {
+                total: 0,
+                used: 0,
+                available: 0
+            };
+            
+            let teamsSharedDevicesInfo = {
+                total: 0,
+                used: 0,
+                available: 0
+            };
+            
+            // Process each SKU to find Teams licenses
+            if (response && response.value) {
+                for (const sku of response.value) {
+                    // Check if this SKU contains a Teams Rooms Pro service plan
+                    const isTeamsRoomsPro = sku.servicePlans.some((plan: any) => 
+                        plan.servicePlanName.includes('Teams Room Pro') ||
+                        plan.servicePlanName.includes('MEETING_ROOM') ||
+                        plan.servicePlanId === teamsRoomsProSkuId);
+                    
+                    // Check if this SKU contains a Teams Shared Devices service plan
+                    const isTeamsSharedDevices = sku.servicePlans.some((plan: any) => 
+                        plan.servicePlanName.includes('Teams Shared Device') ||
+                        plan.servicePlanName.includes('MEETING_ROOM_DEVICE') ||
+                        plan.servicePlanId === teamsSharedDevicesSkuId);
+                    
+                    if (isTeamsRoomsPro) {
+                        teamsRoomsProInfo.total += sku.prepaidUnits.enabled;
+                        teamsRoomsProInfo.used += sku.consumedUnits;
+                        teamsRoomsProInfo.available = teamsRoomsProInfo.total - teamsRoomsProInfo.used;
+                    }
+                    
+                    if (isTeamsSharedDevices) {
+                        teamsSharedDevicesInfo.total += sku.prepaidUnits.enabled;
+                        teamsSharedDevicesInfo.used += sku.consumedUnits;
+                        teamsSharedDevicesInfo.available = teamsSharedDevicesInfo.total - teamsSharedDevicesInfo.used;
+                    }
+                }
+            }
+            
+            return {
+                success: true,
+                licenses: {
+                    teamsRoomsPro: teamsRoomsProInfo,
+                    teamsSharedDevices: teamsSharedDevicesInfo
+                }
+            };
+        } catch (error) {
+            logger.error('Error getting license information:', error);
+            return {
+                success: false,
+                error: `Failed to get license information: ${(error as Error).message || String(error)}`
+            };
+        }
     }
 }
 

@@ -7,9 +7,9 @@ A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) 
 - **Account Management**:
   - Check and validate resource account existence
   - Update display names for existing resource accounts
-  - Verify password status and reset passwords
   
 - **Group & License Management**:
+  - View available license counts for Teams Room Pro and Teams Shared Devices
   - Manage MTR resource account group membership (`MTR-Resource Accounts`)
   - Add/remove accounts from Teams Room license groups:
     - Teams Shared Devices (`MTR-Teams-Panel-License-Microsoft Teams Shared Devices`)
@@ -31,12 +31,12 @@ A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) 
 - npm
 - Microsoft Azure AD tenant with appropriate permissions
 - App registration in Azure AD with the following permissions:
-  - User.ReadWrite.All
-  - Group.ReadWrite.All
-  - Directory.ReadWrite.All
-  - DeviceManagementServiceConfig.ReadWrite.All
-  - DeviceManagementConfiguration.ReadWrite.All
-  - DeviceManagementManagedDevices.ReadWrite.All
+  - User.ReadWrite.All (for account management)
+  - Group.ReadWrite.All (for group membership management)
+  - Directory.ReadWrite.All (for tenant-wide operations)
+  - DeviceManagementServiceConfig.ReadWrite.All (for Intune operations)
+  - DeviceManagementConfiguration.ReadWrite.All (for Intune operations)
+  - DeviceManagementManagedDevices.ReadWrite.All (for Intune operations)
 
 ## Setup
 
@@ -56,12 +56,10 @@ A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) 
    TENANT_ID=your_tenant_id
    CLIENT_ID=your_client_id
    CLIENT_SECRET=your_client_secret
-   RESOURCE_PASSWORD=your_default_resource_account_password
-   MTR_GROUP_ID=your_mtr_resource_accounts_group_id
-   ROOM_GROUP_ID=your_teams_room_license_group_id
+   MTR-ResourceAccountsID=your_mtr_resource_accounts_group_id
+   SHARED_GROUP_ID=your_teams_shared_devices_license_group_id
    PRO_GROUP_ID=your_teams_rooms_pro_license_group_id
-   
-
+   ```
 
 4. Build the application:
    ```
@@ -90,22 +88,31 @@ A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) 
 1. **Resource Account Management**:
    - Enter a UPN (username@domain) to search for an existing account
    - Update display name for existing accounts
-   - Reset passwords to a standard password when needed
+   - View account lock status
 
-2. **Account Status**:
-   - Check if the account password matches the standard password
+2. **License Information**:
+   - View total, used, and available licenses for Teams Rooms Pro and Teams Shared Devices
+   - Refresh license information with one click
+
+3. **Account Status**:
    - Verify if the account is unlocked
    - Check if the account is a member of the MTR Resource Accounts group
 
-3. **License Management**:
+4. **License Management**:
    - Add or remove the account from Teams Shared Devices license group
    - Add or remove the account from Teams Rooms Pro license group
 
-4. **Intune Device Provisioning**:
+5. **Intune Device Provisioning**:
    - Enter a device serial number to check if it's already registered in Intune
    - Validate the serial number format before provisioning
    - Add new devices to Intune with proper description and configuration
    - Suitable for Microsoft Teams Rooms devices including Android-based systems
+
+## Limitations
+
+- Cannot create new resource accounts
+- Cannot provision in Teams Admin Center or generate daily codes for devices
+- Password management functionality not available (for security reasons) - please use Microsoft Admin Center instead
 
 ## Building for Production
 

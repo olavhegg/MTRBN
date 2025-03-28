@@ -43,36 +43,16 @@ export function resetAccountForm() {
         updateSuccessMessage.classList.add('hidden');
     }
     
-    // Hide password section
+    // Hide account status section
     const accountPasswordSection = document.getElementById('accountPasswordSection');
     if (accountPasswordSection) {
         accountPasswordSection.classList.add('hidden');
-    }
-    
-    // Reset password status
-    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
-    const passwordStatusText = document.getElementById('passwordStatusText');
-    if (passwordStatusIndicator && passwordStatusText) {
-        passwordStatusIndicator.className = 'indicator';
-        passwordStatusText.textContent = 'Not verified';
-    }
-    
-    // Hide password success message
-    const passwordSuccessMessage = document.getElementById('passwordSuccessMessage');
-    if (passwordSuccessMessage) {
-        passwordSuccessMessage.classList.add('hidden');
     }
     
     // Hide license section
     const licensesSection = document.getElementById('licensesSection');
     if (licensesSection) {
         licensesSection.classList.add('hidden');
-    }
-    
-    // Hide account status section
-    const accountStatusSection = document.getElementById('accountStatusSection');
-    if (accountStatusSection) {
-        accountStatusSection.classList.add('hidden');
     }
     
     // Re-enable check button (but disabled since no input)
@@ -101,7 +81,6 @@ export async function checkResourceAccount(upn: string, ipcRenderer: any) {
         const accountUpdateSection = document.getElementById('accountUpdateSection');
         const accountPasswordSection = document.getElementById('accountPasswordSection');
         const licensesSection = document.getElementById('licensesSection');
-        const accountStatusSection = document.getElementById('accountStatusSection');
         const upnInput = document.getElementById('upn') as HTMLInputElement;
         const updateDisplayName = document.getElementById('updateDisplayName') as HTMLInputElement;
         
@@ -127,7 +106,7 @@ export async function checkResourceAccount(upn: string, ipcRenderer: any) {
                     updateDisplayName.value = result.account.displayName || '';
                 }
                 
-                // Show password and license sections
+                // Show account status and license sections
                 if (accountPasswordSection) {
                     accountPasswordSection.classList.remove('hidden');
                 }
@@ -212,96 +191,10 @@ export async function updateResourceAccount(upn: string, newDisplayName: string,
     }
 }
 
-export async function resetPassword(upn: string, ipcRenderer: any) {
-    const resetPasswordBtn = document.getElementById('resetPasswordBtn') as HTMLButtonElement;
-    const passwordSuccessMessage = document.getElementById('passwordSuccessMessage');
-    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
-    const passwordStatusText = document.getElementById('passwordStatusText');
-    
-    if (!resetPasswordBtn || !passwordSuccessMessage) return;
-    
-    try {
-        // Check if UPN ends with onmicrosoft.com
-        if (!upn.toLowerCase().endsWith('onmicrosoft.com')) {
-            if (passwordStatusIndicator && passwordStatusText) {
-                passwordStatusIndicator.className = 'indicator warning';
-                passwordStatusText.textContent = 'Password reset is only available for cloud accounts. Changes for on-premises accounts must be done in on-premises Active Directory.';
-            }
-            showToast('Password reset only available for cloud accounts', false);
-            return;
-        }
-        
-        // Disable button and show loading state
-        resetPasswordBtn.disabled = true;
-        resetPasswordBtn.textContent = 'Resetting...';
-        
-        const result = await ipcRenderer.invoke('reset-account-password', upn);
-        
-        // Reset button state
-        resetPasswordBtn.disabled = false;
-        resetPasswordBtn.textContent = 'Reset to Generic Password';
-        
-        if (result.success) {
-            // Show success message
-            passwordSuccessMessage.textContent = 'Password has been reset to the generic password';
-            passwordSuccessMessage.classList.remove('hidden');
-            
-            // Hide success message after 5 seconds
-            setTimeout(() => {
-                passwordSuccessMessage.classList.add('hidden');
-            }, 5000);
-            
-            // Update the password status indicator
-            if (passwordStatusIndicator && passwordStatusText) {
-                passwordStatusIndicator.className = 'indicator success';
-                passwordStatusText.textContent = 'Password reset to generic password';
-            }
-            
-            showToast('Password reset successfully', false);
-        } else {
-            const errorMsg = result.error || 'Failed to reset password';
-            
-            // Use warning instead of error for permission issues
-            if (errorMsg.includes("doesn't have permission") || errorMsg.includes("Insufficient privileges")) {
-                showToast('Permission issue: The app needs User.ReadWrite.All permission in Azure AD', false);
-                
-                if (passwordStatusIndicator && passwordStatusText) {
-                    passwordStatusIndicator.className = 'indicator warning';
-                    passwordStatusText.textContent = 'Password reset requires User.ReadWrite.All permission in Azure AD';
-                }
-            } else {
-                showToast(errorMsg, true);
-            }
-        }
-    } catch (error) {
-        console.error('Error resetting password:', error);
-        
-        // Reset button state
-        resetPasswordBtn.disabled = false;
-        resetPasswordBtn.textContent = 'Reset to Generic Password';
-        
-        showToast(`Failed to reset password: ${(error as Error).message}`, true);
-    }
-}
-
 // Function to check and update account status indicators
 export async function checkAccountStatus(upn: string, ipcRenderer: any) {
     // Check account unlock status
     await checkAccountUnlockStatus(upn, ipcRenderer);
-    
-    // Update password status indicator based on account type
-    const passwordStatusIndicator = document.getElementById('passwordStatusIndicator');
-    const passwordStatusText = document.getElementById('passwordStatusText');
-    
-    if (passwordStatusIndicator && passwordStatusText) {
-        if (upn.toLowerCase().endsWith('onmicrosoft.com')) {
-            passwordStatusIndicator.className = 'indicator info';
-            passwordStatusText.textContent = 'Cloud account - password can be reset';
-        } else {
-            passwordStatusIndicator.className = 'indicator warning';
-            passwordStatusText.textContent = 'On-premises account - password must be managed in Active Directory';
-        }
-    }
     
     // Check group memberships
     await checkGroupMemberships(upn, ipcRenderer);

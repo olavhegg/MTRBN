@@ -2,13 +2,13 @@ import { resetForm, checkSerialNumber, provisionDevice } from './deviceManagemen
 import { 
     resetAccountForm, 
     checkResourceAccount, 
-    updateResourceAccount, 
-    resetPassword
+    updateResourceAccount
 } from './accountManagement.js';
 import { 
     addToMtrGroup, removeFromMtrGroup, 
     addToRoomGroup, removeFromRoomGroup, 
-    addToProGroup, removeFromProGroup 
+    addToProGroup, removeFromProGroup,
+    getLicenseInfo
 } from './groupManagement.js';
 
 // Setup event handlers for device tab
@@ -159,23 +159,6 @@ export function setupAccountHandlers(ipcRenderer: any) {
             await updateResourceAccount(upn, newDisplayName, ipcRenderer);
         });
     }
-    
-    // Reset password button
-    const resetPasswordBtn = document.getElementById('resetPasswordBtn');
-    if (resetPasswordBtn) {
-        resetPasswordBtn.addEventListener('click', async (event) => {
-            // Prevent default action to avoid navigation
-            event.preventDefault();
-            
-            const upn = upnInput.dataset.foundUpn || upnInput.value.trim();
-            
-            if (!upn) {
-                return;
-            }
-            
-            await resetPassword(upn, ipcRenderer);
-        });
-    }
 }
 
 // Setup event handlers for group management
@@ -205,7 +188,10 @@ export function setupGroupHandlers(ipcRenderer: any) {
     // Add to MTR Group button (in Account Status section)
     const addToMtrStatusBtn = document.getElementById('addToMtrStatusBtn');
     if (addToMtrStatusBtn && upnInput) {
-        addToMtrStatusBtn.addEventListener('click', () => {
+        addToMtrStatusBtn.addEventListener('click', (event) => {
+            // Prevent default action to avoid navigation
+            event.preventDefault();
+            
             const upn = upnInput.dataset.foundUpn || upnInput.value.trim();
             if (!upn) return;
             addToMtrGroup(upn, ipcRenderer);
@@ -215,7 +201,10 @@ export function setupGroupHandlers(ipcRenderer: any) {
     // Remove from MTR Group button (in Account Status section)
     const removeFromMtrStatusBtn = document.getElementById('removeFromMtrStatusBtn');
     if (removeFromMtrStatusBtn && upnInput) {
-        removeFromMtrStatusBtn.addEventListener('click', () => {
+        removeFromMtrStatusBtn.addEventListener('click', (event) => {
+            // Prevent default action to avoid navigation
+            event.preventDefault();
+            
             const upn = upnInput.dataset.foundUpn || upnInput.value.trim();
             if (!upn) return;
             removeFromMtrGroup(upn, ipcRenderer);
@@ -315,5 +304,68 @@ export function setupQuitHandler(ipcRenderer: any) {
         quitButton.addEventListener('click', () => {
             ipcRenderer.invoke('quit-app');
         });
+    }
+}
+
+// Setup event handlers for license management
+export function setupLicenseHandlers(ipcRenderer: any) {
+    // Refresh licenses button
+    const refreshLicensesBtn = document.getElementById('refreshLicensesBtn');
+    if (refreshLicensesBtn) {
+        refreshLicensesBtn.addEventListener('click', () => {
+            loadLicenseInfo(ipcRenderer);
+        });
+    }
+    
+    // Load license info when the license section becomes visible
+    const licensesSection = document.getElementById('licensesSection');
+    if (licensesSection) {
+        // Create an observer to watch for the section becoming visible
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class' && 
+                    !licensesSection.classList.contains('hidden')) {
+                    // Section is now visible, load license info
+                    loadLicenseInfo(ipcRenderer);
+                }
+            });
+        });
+        
+        // Start observing
+        observer.observe(licensesSection, { attributes: true });
+    }
+}
+
+// Function to load and display license information
+async function loadLicenseInfo(ipcRenderer: any) {
+    // Mark the refresh button as spinning
+    const refreshBtn = document.getElementById('refreshLicensesBtn');
+    if (refreshBtn) {
+        refreshBtn.classList.add('spinning');
+    }
+    
+    try {
+        const result = await getLicenseInfo(ipcRenderer);
+        
+        if (result.success && result.licenses) {
+            // Update Teams Rooms Pro license info
+            const teamsRoomsPro = result.licenses.teamsRoomsPro;
+            document.getElementById('teamsRoomsProTotal')!.textContent = teamsRoomsPro.total.toString();
+            document.getElementById('teamsRoomsProUsed')!.textContent = teamsRoomsPro.used.toString();
+            document.getElementById('teamsRoomsProAvailable')!.textContent = teamsRoomsPro.available.toString();
+            
+            // Update Teams Shared Devices license info
+            const teamsSharedDevices = result.licenses.teamsSharedDevices;
+            document.getElementById('teamsSharedDevicesTotal')!.textContent = teamsSharedDevices.total.toString();
+            document.getElementById('teamsSharedDevicesUsed')!.textContent = teamsSharedDevices.used.toString();
+            document.getElementById('teamsSharedDevicesAvailable')!.textContent = teamsSharedDevices.available.toString();
+        }
+    } catch (error) {
+        console.error('Error loading license information:', error);
+    } finally {
+        // Remove spinning class from refresh button
+        if (refreshBtn) {
+            refreshBtn.classList.remove('spinning');
+        }
     }
 } 

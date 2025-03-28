@@ -2,6 +2,8 @@ import { showLoader, hideLoader, showToast } from './utils.js';
 
 // Functions for checking group memberships
 export async function checkMtrGroupMembership(upn: string, ipcRenderer: any) {
+    console.log('Checking MTR group membership for:', upn);
+    
     const mtrGroupIndicator = document.getElementById('mtrGroupIndicator');
     const addToMtrBtn = document.getElementById('addToMtrBtn') as HTMLButtonElement;
     const removeFromMtrBtn = document.getElementById('removeFromMtrBtn') as HTMLButtonElement;
@@ -11,13 +13,32 @@ export async function checkMtrGroupMembership(upn: string, ipcRenderer: any) {
     const addToMtrStatusBtn = document.getElementById('addToMtrStatusBtn') as HTMLButtonElement;
     const removeFromMtrStatusBtn = document.getElementById('removeFromMtrStatusBtn') as HTMLButtonElement;
     
-    if (!mtrGroupIndicator || !addToMtrBtn || !removeFromMtrBtn) return;
+    console.log('Status buttons found:', {
+        addToMtrBtn: !!addToMtrBtn,
+        removeFromMtrBtn: !!removeFromMtrBtn,
+        resourceGroupIndicator: !!resourceGroupIndicator,
+        addToMtrStatusBtn: !!addToMtrStatusBtn,
+        removeFromMtrStatusBtn: !!removeFromMtrStatusBtn
+    });
+    
+    // Only return if BOTH sets of elements are missing
+    if ((!mtrGroupIndicator || !addToMtrBtn || !removeFromMtrBtn) && 
+        (!resourceGroupIndicator || !addToMtrStatusBtn || !removeFromMtrStatusBtn)) {
+        console.log('No elements found to update for MTR group membership');
+        return;
+    }
     
     try {
-        // Set to loading state
-        mtrGroupIndicator.className = 'indicator small';
-        addToMtrBtn.disabled = true;
-        removeFromMtrBtn.disabled = true;
+        // Set to loading state for license section elements if they exist
+        if (mtrGroupIndicator) {
+            mtrGroupIndicator.className = 'indicator small';
+        }
+        if (addToMtrBtn) {
+            addToMtrBtn.disabled = true;
+        }
+        if (removeFromMtrBtn) {
+            removeFromMtrBtn.disabled = true;
+        }
         
         // Also set status section to loading if available
         if (resourceGroupIndicator) {
@@ -33,13 +54,20 @@ export async function checkMtrGroupMembership(upn: string, ipcRenderer: any) {
         }
         
         const result = await ipcRenderer.invoke('check-group-membership', upn);
+        console.log('MTR group membership result:', result);
         
         if (result.success) {
             if (result.isMember) {
-                // Update license section indicators
-                mtrGroupIndicator.className = 'indicator small success';
-                addToMtrBtn.disabled = true;
-                removeFromMtrBtn.disabled = false;
+                // Update license section indicators if they exist
+                if (mtrGroupIndicator) {
+                    mtrGroupIndicator.className = 'indicator small success';
+                }
+                if (addToMtrBtn) {
+                    addToMtrBtn.disabled = true;
+                }
+                if (removeFromMtrBtn) {
+                    removeFromMtrBtn.disabled = false;
+                }
                 
                 // Update status section indicators if available
                 if (resourceGroupIndicator) {
@@ -48,16 +76,24 @@ export async function checkMtrGroupMembership(upn: string, ipcRenderer: any) {
                 
                 if (addToMtrStatusBtn) {
                     addToMtrStatusBtn.disabled = true;
+                    console.log('Add button disabled because user is already a member');
                 }
                 
                 if (removeFromMtrStatusBtn) {
                     removeFromMtrStatusBtn.disabled = false;
+                    console.log('Remove button enabled because user is a member');
                 }
             } else {
-                // Update license section indicators
-                mtrGroupIndicator.className = 'indicator small error';
-                addToMtrBtn.disabled = false;
-                removeFromMtrBtn.disabled = true;
+                // Update license section indicators if they exist
+                if (mtrGroupIndicator) {
+                    mtrGroupIndicator.className = 'indicator small error';
+                }
+                if (addToMtrBtn) {
+                    addToMtrBtn.disabled = false;
+                }
+                if (removeFromMtrBtn) {
+                    removeFromMtrBtn.disabled = true;
+                }
                 
                 // Update status section indicators if available
                 if (resourceGroupIndicator) {
@@ -66,17 +102,25 @@ export async function checkMtrGroupMembership(upn: string, ipcRenderer: any) {
                 
                 if (addToMtrStatusBtn) {
                     addToMtrStatusBtn.disabled = false;
+                    console.log('Add button enabled because user is not a member');
                 }
                 
                 if (removeFromMtrStatusBtn) {
                     removeFromMtrStatusBtn.disabled = true;
+                    console.log('Remove button disabled because user is not a member');
                 }
             }
         } else {
-            // Update license section indicators
-            mtrGroupIndicator.className = 'indicator small error';
-            addToMtrBtn.disabled = true;
-            removeFromMtrBtn.disabled = true;
+            // Update license section indicators if they exist
+            if (mtrGroupIndicator) {
+                mtrGroupIndicator.className = 'indicator small error';
+            }
+            if (addToMtrBtn) {
+                addToMtrBtn.disabled = true;
+            }
+            if (removeFromMtrBtn) {
+                removeFromMtrBtn.disabled = true;
+            }
             
             // Update status section indicators if available
             if (resourceGroupIndicator) {
@@ -85,19 +129,29 @@ export async function checkMtrGroupMembership(upn: string, ipcRenderer: any) {
             
             if (addToMtrStatusBtn) {
                 addToMtrStatusBtn.disabled = true;
+                console.log('Add button disabled because of error:', result.error);
             }
             
             if (removeFromMtrStatusBtn) {
                 removeFromMtrStatusBtn.disabled = true;
+                console.log('Remove button disabled because of error:', result.error);
             }
             
             showToast(result.error || 'Failed to check MTR group membership', true);
         }
     } catch (error) {
-        // Update license section indicators
-        mtrGroupIndicator.className = 'indicator small error';
-        addToMtrBtn.disabled = true;
-        removeFromMtrBtn.disabled = true;
+        console.error('Error in checkMtrGroupMembership:', error);
+        
+        // Update license section indicators if they exist
+        if (mtrGroupIndicator) {
+            mtrGroupIndicator.className = 'indicator small error';
+        }
+        if (addToMtrBtn) {
+            addToMtrBtn.disabled = true;
+        }
+        if (removeFromMtrBtn) {
+            removeFromMtrBtn.disabled = true;
+        }
         
         // Update status section indicators if available
         if (resourceGroupIndicator) {
@@ -198,11 +252,25 @@ export async function checkProGroupMembership(upn: string, ipcRenderer: any) {
 
 // Function to add user to MTR group
 export async function addToMtrGroup(upn: string, ipcRenderer: any) {
-    const addToMtrBtn = document.getElementById('addToMtrBtn') as HTMLButtonElement;
-    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
-    const addToMtrStatusBtn = document.getElementById('addToMtrStatusBtn') as HTMLButtonElement;
+    console.log('Adding user to MTR group:', upn);
     
-    if (!addToMtrBtn) return;
+    const addToMtrBtn = document.getElementById('addToMtrBtn') as HTMLButtonElement;
+    const addToMtrStatusBtn = document.getElementById('addToMtrStatusBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    const mtrStatusSuccessMessage = document.getElementById('mtrStatusSuccessMessage');
+    
+    console.log('Add MTR buttons found:', {
+        addToMtrBtn: !!addToMtrBtn,
+        addToMtrStatusBtn: !!addToMtrStatusBtn,
+        licenseSuccessMessage: !!licenseSuccessMessage,
+        mtrStatusSuccessMessage: !!mtrStatusSuccessMessage
+    });
+    
+    // Don't return if one of the buttons is missing - it might be in a different section
+    if (!addToMtrBtn && !addToMtrStatusBtn) {
+        console.log('No add buttons found for MTR group');
+        return;
+    }
     
     try {
         // Disable button and show loading state
@@ -217,6 +285,7 @@ export async function addToMtrGroup(upn: string, ipcRenderer: any) {
         }
         
         const result = await ipcRenderer.invoke('add-to-mtr-group', upn);
+        console.log('Add to MTR group result:', result);
         
         // Reset button state
         if (addToMtrBtn) {
@@ -228,6 +297,7 @@ export async function addToMtrGroup(upn: string, ipcRenderer: any) {
         }
         
         if (result.success) {
+            // Show success message in license section if available
             if (licenseSuccessMessage) {
                 licenseSuccessMessage.textContent = result.message;
                 licenseSuccessMessage.classList.remove('hidden');
@@ -238,8 +308,20 @@ export async function addToMtrGroup(upn: string, ipcRenderer: any) {
                 }, 5000);
             }
             
+            // Show success message in status section if available
+            if (mtrStatusSuccessMessage) {
+                mtrStatusSuccessMessage.textContent = result.message;
+                mtrStatusSuccessMessage.classList.remove('hidden');
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    mtrStatusSuccessMessage.classList.add('hidden');
+                }, 5000);
+            }
+            
             // Refresh membership status
-            checkMtrGroupMembership(upn, ipcRenderer);
+            console.log('Refreshing MTR group membership after add operation');
+            await checkMtrGroupMembership(upn, ipcRenderer);
             
             showToast('Added to MTR Resource Accounts group', false);
         } else {
@@ -248,6 +330,7 @@ export async function addToMtrGroup(upn: string, ipcRenderer: any) {
             showToast(result.error || 'Failed to add to MTR group', true);
         }
     } catch (error) {
+        console.error('Error in addToMtrGroup:', error);
         if (addToMtrBtn) {
             addToMtrBtn.disabled = false;
             addToMtrBtn.textContent = 'Add';
@@ -262,41 +345,93 @@ export async function addToMtrGroup(upn: string, ipcRenderer: any) {
 
 // Function to remove user from MTR group
 export async function removeFromMtrGroup(upn: string, ipcRenderer: any) {
-    const removeFromMtrBtn = document.getElementById('removeFromMtrBtn') as HTMLButtonElement;
-    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    console.log('Removing user from MTR group:', upn);
     
-    if (!removeFromMtrBtn || !licenseSuccessMessage) return;
+    const removeFromMtrBtn = document.getElementById('removeFromMtrBtn') as HTMLButtonElement;
+    const removeFromMtrStatusBtn = document.getElementById('removeFromMtrStatusBtn') as HTMLButtonElement;
+    const licenseSuccessMessage = document.getElementById('licenseSuccessMessage');
+    const mtrStatusSuccessMessage = document.getElementById('mtrStatusSuccessMessage');
+    
+    console.log('Remove MTR buttons found:', {
+        removeFromMtrBtn: !!removeFromMtrBtn,
+        removeFromMtrStatusBtn: !!removeFromMtrStatusBtn,
+        licenseSuccessMessage: !!licenseSuccessMessage,
+        mtrStatusSuccessMessage: !!mtrStatusSuccessMessage
+    });
+    
+    // Don't return if one of the buttons is missing - it might be in a different section
+    if (!removeFromMtrBtn && !removeFromMtrStatusBtn) {
+        console.log('No remove buttons found for MTR group');
+        return;
+    }
     
     try {
         // Disable button and show loading state
-        removeFromMtrBtn.disabled = true;
-        removeFromMtrBtn.textContent = 'Removing...';
+        if (removeFromMtrBtn) {
+            removeFromMtrBtn.disabled = true;
+            removeFromMtrBtn.textContent = 'Removing...';
+        }
+        
+        if (removeFromMtrStatusBtn) {
+            removeFromMtrStatusBtn.disabled = true;
+            removeFromMtrStatusBtn.textContent = 'Removing...';
+        }
         
         const result = await ipcRenderer.invoke('remove-from-mtr-group', upn);
+        console.log('Remove from MTR group result:', result);
         
         // Reset button state
-        removeFromMtrBtn.textContent = 'Remove';
+        if (removeFromMtrBtn) {
+            removeFromMtrBtn.textContent = 'Remove';
+        }
+        
+        if (removeFromMtrStatusBtn) {
+            removeFromMtrStatusBtn.textContent = 'Remove';
+        }
         
         if (result.success) {
-            licenseSuccessMessage.textContent = result.message;
-            licenseSuccessMessage.classList.remove('hidden');
+            // Show success message in license section if available
+            if (licenseSuccessMessage) {
+                licenseSuccessMessage.textContent = result.message;
+                licenseSuccessMessage.classList.remove('hidden');
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    licenseSuccessMessage.classList.add('hidden');
+                }, 5000);
+            }
             
-            // Hide success message after 5 seconds
-            setTimeout(() => {
-                licenseSuccessMessage.classList.add('hidden');
-            }, 5000);
+            // Show success message in status section if available
+            if (mtrStatusSuccessMessage) {
+                mtrStatusSuccessMessage.textContent = result.message;
+                mtrStatusSuccessMessage.classList.remove('hidden');
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    mtrStatusSuccessMessage.classList.add('hidden');
+                }, 5000);
+            }
             
             // Refresh membership status
-            checkMtrGroupMembership(upn, ipcRenderer);
+            console.log('Refreshing MTR group membership after remove operation');
+            await checkMtrGroupMembership(upn, ipcRenderer);
             
             showToast('Removed from MTR Resource Accounts group', false);
         } else {
-            removeFromMtrBtn.disabled = false;
+            if (removeFromMtrBtn) removeFromMtrBtn.disabled = false;
+            if (removeFromMtrStatusBtn) removeFromMtrStatusBtn.disabled = false;
             showToast(result.error || 'Failed to remove from MTR group', true);
         }
     } catch (error) {
-        removeFromMtrBtn.disabled = false;
-        removeFromMtrBtn.textContent = 'Remove';
+        console.error('Error in removeFromMtrGroup:', error);
+        if (removeFromMtrBtn) {
+            removeFromMtrBtn.disabled = false;
+            removeFromMtrBtn.textContent = 'Remove';
+        }
+        if (removeFromMtrStatusBtn) {
+            removeFromMtrStatusBtn.disabled = false;
+            removeFromMtrStatusBtn.textContent = 'Remove'; 
+        }
         showToast('Error removing from MTR group: ' + (error as Error).message, true);
     }
 }
@@ -479,5 +614,52 @@ export async function runGroupDiagnostics(ipcRenderer: any) {
     } catch (error) {
         console.error('Error running group diagnostics:', error);
         return { success: false, error: (error as Error).message };
+    }
+}
+
+// Function to get license information
+export async function getLicenseInfo(ipcRenderer: any): Promise<{
+    success: boolean;
+    error?: string;
+    licenses?: {
+        teamsRoomsPro: {
+            total: number;
+            used: number;
+            available: number;
+        };
+        teamsSharedDevices: {
+            total: number;
+            used: number;
+            available: number;
+        };
+    };
+}> {
+    try {
+        showLoader('Getting license information...');
+        
+        const result = await ipcRenderer.invoke('get-license-info');
+        
+        hideLoader();
+        
+        if (result.success) {
+            return {
+                success: true,
+                licenses: result.licenses
+            };
+        } else {
+            showToast(result.error || 'Failed to get license information', true);
+            return {
+                success: false,
+                error: result.error || 'Failed to get license information'
+            };
+        }
+    } catch (error) {
+        hideLoader();
+        const errorMessage = 'Error getting license information: ' + (error as Error).message;
+        showToast(errorMessage, true);
+        return {
+            success: false,
+            error: errorMessage
+        };
     }
 } 
