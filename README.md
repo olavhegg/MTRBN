@@ -134,15 +134,20 @@ For this application to function properly, you need to create an app registratio
 
 | Permission Name | Type | Description | Features Using This Permission |
 |-----------------|------|-------------|--------------------------------|
-| **User.ReadWrite.All** | Application | Read and write all user's profiles | - Check resource account existence<br>- Update display names<br>- Verify account status |
-| **User.Read.All** | Application | Read all user's profiles | - Basic account lookups<br>- Status checks |
-| **Group.ReadWrite.All** | Application | Read and write all groups | - Add/remove users from MTR Resource Accounts group<br>- Add/remove users from license groups<br>- Check group memberships |
-| **Group.Read.All** | Application | Read all groups | - View license group information<br>- Check group memberships |
+| **User.ReadWrite.All** | Application | Read and write all user's profiles | - Check resource account existence<br>- Update display names<br>- Verify account status<br>- All user lookups and status checks |
+| **Group.ReadWrite.All** | Application | Read and write all groups | - Add/remove users from MTR Resource Accounts group<br>- Add/remove users from license groups<br>- Check group memberships<br>- View license group information |
 | **Directory.ReadWrite.All** | Application | Read and write directory data | - Required for tenant-wide operations<br>- Access to extended account properties |
 | **DeviceManagementServiceConfig.ReadWrite.All** | Application | Read and write Microsoft Intune service configurations | - Manage device registration in Intune<br>- Configure device settings |
 | **DeviceManagementConfiguration.ReadWrite.All** | Application | Read and write Microsoft Intune device configurations | - Set up device configurations<br>- Apply policy settings to MTR devices |
 | **DeviceManagementManagedDevices.ReadWrite.All** | Application | Read and write Microsoft Intune devices | - Register new devices by serial number<br>- Check existing device status |
-| **Organization.Read.All** | Application | Read organization information | - Access license information<br>- View tenant details |
+
+#### Optional Permissions
+
+| Permission Name | Type | Description | Features Using This Permission |
+|-----------------|------|-------------|--------------------------------|
+| **Organization.Read.All** | Application | Read organization information | - Enhanced access to license information<br>- View detailed tenant data |
+
+**Note:** The app can function with fewer permissions than listed above, depending on which features you need to use. The minimum required permissions are User.ReadWrite.All and Group.ReadWrite.All for basic account and license management functionality. The Intune-related permissions are only needed if you use the device provisioning features.
 
 #### Setup Instructions for App Registration
 
