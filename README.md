@@ -1,12 +1,17 @@
 # MTR Resource Account Management
 
-A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) resource accounts and provision devices in Microsoft Intune.
+A desktop application built with Electron and TypeScript to manage Microsoft Teams Rooms (MTR) resource accounts and provision devices in Microsoft Intune for Bane NOR.
+
+## Overview
+
+This application helps IT administrators manage Microsoft Teams Rooms resource accounts and provision MTR devices in Microsoft Intune. It provides a user-friendly interface for checking account status, managing license assignments, and provisioning devices without having to navigate multiple Microsoft admin portals.
 
 ## Features
 
 - **Account Management**:
   - Check and validate resource account existence
   - Update display names for existing resource accounts
+  - Verify account status and group memberships
   
 - **Group & License Management**:
   - View available license counts for Teams Room Pro and Teams Shared Devices
@@ -15,20 +20,106 @@ A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) 
     - Teams Shared Devices (`MTR-Teams-Panel-License-Microsoft Teams Shared Devices`)
     - Teams Rooms Pro (`MTR-Teams-Room-License-Teams Rooms Pro`)
   
-- **Account Status**:
-  - Check if accounts are unlocked
-  - Verify membership in required groups
-
 - **Intune Device Management**:
   - Check if a device exists in Intune using its serial number
   - Provision new devices in Intune for Microsoft Teams Rooms
   - Support for various device types including Android-based MTR devices
   - Validate device serial numbers before provisioning
 
+## Technical Architecture
+
+### Application Structure
+
+The application is built on Electron with a main process and renderer process architecture:
+
+```
+MTR/
+├── dist/                      # Compiled JavaScript files
+├── node_modules/              # Dependencies
+├── src/
+│   ├── main/                  # Main process code
+│   │   ├── handlers/          # IPC handlers for renderer requests
+│   │   │   ├── accountHandlers.ts  # Resource account management
+│   │   │   ├── groupHandlers.ts    # Group and license management
+│   │   │   ├── intuneHandlers.ts   # Device management in Intune
+│   │   │   └── index.ts            # Exports all handlers
+│   │   ├── services/          # Core business logic
+│   │   │   ├── graphBaseService.ts # Base service for Graph API
+│   │   │   ├── graphService.ts     # Combined service for all operations
+│   │   │   ├── userService.ts      # User account operations
+│   │   │   ├── groupService.ts     # Group management operations
+│   │   │   └── deviceService.ts    # Device management operations
+│   │   ├── utils/             # Utilities
+│   │   │   └── logger.ts      # Logging functionality
+│   │   └── index.ts           # Main process entry point
+│   ├── renderer/              # Renderer process (UI) code
+│   │   ├── modules/           # UI modules
+│   │   │   ├── accountManagement.ts  # Account UI logic
+│   │   │   ├── deviceManagement.ts   # Device UI logic
+│   │   │   ├── eventHandlers.ts      # DOM event handlers
+│   │   │   ├── groupManagement.ts    # Group/license UI logic
+│   │   │   ├── utils.ts              # UI utilities
+│   │   │   └── types.ts              # TypeScript interfaces
+│   │   ├── index.html         # Main HTML page
+│   │   ├── index.ts           # Renderer entry point
+│   │   ├── styles.css         # Styling
+│   │   └── types.d.ts         # Renderer type definitions
+│   └── preload.ts             # Preload script for IPC
+├── .env                       # Environment variables
+├── logitech.ico               # Application icon
+├── Bane_NOR_logo.svg.png      # Bane NOR logo for UI
+├── package.json               # Project metadata and dependencies
+├── package-lock.json          # Dependency lock file
+└── tsconfig.json              # TypeScript configuration
+```
+
+### Technology Stack
+
+- **Frontend**: HTML, CSS, TypeScript
+- **Backend**: Node.js, Electron
+- **API Integration**: Microsoft Graph API
+- **Authentication**: Azure AD App Registration with Client Credentials
+- **Build Tools**: TypeScript compiler
+
+### Communication Flow
+
+1. **UI Events**: User interactions trigger event handlers in the renderer process
+2. **IPC Communication**: Requests are sent from renderer to main process via IPC
+3. **API Calls**: Main process services make authenticated calls to Microsoft Graph API
+4. **Response Handling**: Results are sent back to the renderer and displayed in the UI
+
+## Workflow Examples
+
+### Account Management Workflow
+
+1. User enters a resource account email (UPN) in the search field
+2. Application validates the account existence via Microsoft Graph API
+3. If found, account details are displayed including:
+   - Display name
+   - Account status (locked/unlocked)
+   - Group memberships
+4. User can update the display name if needed
+5. Group memberships can be managed through the UI
+
+### Device Provisioning Workflow
+
+1. User enters a device serial number in the search field
+2. Application checks if the device already exists in Intune
+3. If not found, user can enter device details (name, model, type)
+4. On submission, the application provisions the device in Intune
+5. Status updates are displayed to the user
+
+### License Management Workflow
+
+1. Application loads available license information on startup
+2. User can view total, used, and available licenses for different license types
+3. When checking a resource account, license assignments are displayed
+4. User can add or remove license group memberships
+5. Changes are immediately reflected in Microsoft 365
+
 ## Prerequisites
 
-- Node.js 16+
-- npm
+- Node.js 16+ and npm
 - Microsoft Azure AD tenant with appropriate permissions
 - App registration in Azure AD with the following permissions:
   - User.ReadWrite.All (for account management)
@@ -38,7 +129,7 @@ A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) 
   - DeviceManagementConfiguration.ReadWrite.All (for Intune operations)
   - DeviceManagementManagedDevices.ReadWrite.All (for Intune operations)
 
-## Setup
+## Installation and Setup
 
 1. Clone the repository:
    ```
@@ -73,60 +164,46 @@ A desktop application built with Electron to manage Microsoft Teams Rooms (MTR) 
 
 ## Development
 
-- Run in development mode with hot reloading:
+- **Development Mode**: Run with hot reloading
   ```
   npm run dev
   ```
 
-- Clean build artifacts:
+- **Clean Build**: Remove build artifacts
   ```
   npm run clean
   ```
 
-## Usage
+- **Build for Production**:
+  ```
+  npm run build
+  ```
 
-1. **Resource Account Management**:
-   - Enter a UPN (username@domain) to search for an existing account
-   - Update display name for existing accounts
-   - View account lock status
+- **Package for Distribution**: Create executable
+  ```
+  npx electron-builder --win
+  ```
 
-2. **License Information**:
-   - View total, used, and available licenses for Teams Rooms Pro and Teams Shared Devices
-   - Refresh license information with one click
+## Security Considerations
 
-3. **Account Status**:
-   - Verify if the account is unlocked
-   - Check if the account is a member of the MTR Resource Accounts group
-
-4. **License Management**:
-   - Add or remove the account from Teams Shared Devices license group
-   - Add or remove the account from Teams Rooms Pro license group
-
-5. **Intune Device Provisioning**:
-   - Enter a device serial number to check if it's already registered in Intune
-   - Validate the serial number format before provisioning
-   - Add new devices to Intune with proper description and configuration
-   - Suitable for Microsoft Teams Rooms devices including Android-based systems
+- The application uses client credentials flow with a service principal
+- All credentials are stored in the .env file (not committed to version control)
+- Communication with Microsoft Graph API is secured via HTTPS
+- Password management functionality is intentionally removed for security reasons
+- The application implements proper error handling for failed API calls
 
 ## Limitations
 
-- Cannot create new resource accounts
+- Cannot create new resource accounts (by design)
 - Cannot provision in Teams Admin Center or generate daily codes for devices
 - Password management functionality not available (for security reasons) - please use Microsoft Admin Center instead
 
-## Building for Production
+## Troubleshooting
 
-To build the application for production:
-
-```
-npm run build
-```
-
-For Windows installers, you can use electron-builder:
-
-```
-npx electron-builder --win
-```
+- **Authentication Issues**: Verify credentials in .env file and ensure app registration has proper permissions
+- **API Errors**: Check network connectivity and that proper scopes are granted to the app registration
+- **License Issues**: Ensure you have available licenses in your tenant
+- **Logging**: Check application logs for detailed error information
 
 ## License
 
