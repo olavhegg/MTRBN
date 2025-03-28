@@ -138,7 +138,6 @@ For this application to function properly, you need to create an app registratio
 | **Group.ReadWrite.All** | Application | Read and write all groups | - Add/remove users from MTR Resource Accounts group<br>- Add/remove users from license groups<br>- Check group memberships<br>- View license group information |
 | **Directory.ReadWrite.All** | Application | Read and write directory data | - Required for tenant-wide operations<br>- Access to extended account properties |
 | **DeviceManagementServiceConfig.ReadWrite.All** | Application | Read and write Microsoft Intune service configurations | - Manage device registration in Intune<br>- Configure device settings |
-| **DeviceManagementConfiguration.ReadWrite.All** | Application | Read and write Microsoft Intune device configurations | - Set up device configurations<br>- Apply policy settings to MTR devices |
 | **DeviceManagementManagedDevices.ReadWrite.All** | Application | Read and write Microsoft Intune devices | - Register new devices by serial number<br>- Check existing device status |
 
 #### Optional Permissions
@@ -270,6 +269,34 @@ npm run pack
 - Cannot create new resource accounts (by design)
 - Cannot provision in Teams Admin Center or generate daily codes for devices
 - Password management functionality not available (for security reasons) - please use Microsoft Admin Center instead
+
+## Future Work
+
+This application can be extended with the following features in future versions:
+
+### Teams Admin Center Integration
+
+- **Device Provisioning**: Integrate with Teams Admin Center API to provision devices directly
+- **Activation Code Generation**: Generate and display activation codes for MTR devices
+- **Meeting Settings**: Configure meeting settings for rooms (automatic acceptance, details, etc.)
+
+### Enhanced Device Management
+
+- **Device Health Monitoring**: Track and display device health status from Teams Admin Center
+- **Firmware Updates**: Manage firmware updates for MTR devices
+- **Remote Actions**: Perform remote actions like restart, update, and troubleshooting
+
+### User Experience Improvements
+
+- **Bulk Operations**: Support for bulk importing and managing multiple resource accounts
+- **Reporting Dashboard**: Visual reporting of room usage, status, and configuration
+- **Customizable Interface**: Theming and layout options to match organization branding
+
+### Administrative Enhancements
+
+- **Role-Based Access**: Different permission levels for IT admins vs. helpdesk staff
+- **Audit Logging**: Detailed logs of all actions performed in the application
+- **Scheduled Tasks**: Set up automated tasks for license assignments or group membership changes
 
 ## Troubleshooting
 
