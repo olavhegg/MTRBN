@@ -647,16 +647,15 @@ export async function getLicenseInfo(ipcRenderer: any): Promise<{
                 licenses: result.licenses
             };
         } else {
-            showToast(result.error || 'Failed to get license information', true);
+            // Remove the toast popup and just return the error
             return {
                 success: false,
-                error: result.error || 'Failed to get license information'
+                error: 'No licenses found in this tenant. Contact your administrator if you believe this is an error.'
             };
         }
     } catch (error) {
         hideLoader();
-        const errorMessage = 'Error getting license information: ' + (error as Error).message;
-        showToast(errorMessage, true);
+        const errorMessage = 'Unable to retrieve license information. Please try again later.';
         return {
             success: false,
             error: errorMessage

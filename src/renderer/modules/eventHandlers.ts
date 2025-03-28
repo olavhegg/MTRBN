@@ -344,8 +344,16 @@ async function loadLicenseInfo(ipcRenderer: any) {
         refreshBtn.classList.add('spinning');
     }
     
+    // Clear any previous error messages
+    const errorElement = document.getElementById('licenseInfoError');
+    if (errorElement) {
+        errorElement.remove();
+    }
+    
     try {
+        console.log('Fetching license information...');
         const result = await getLicenseInfo(ipcRenderer);
+        console.log('License info result:', result);
         
         if (result.success && result.licenses) {
             // Update Teams Rooms Pro license info
@@ -359,9 +367,49 @@ async function loadLicenseInfo(ipcRenderer: any) {
             document.getElementById('teamsSharedDevicesTotal')!.textContent = teamsSharedDevices.total.toString();
             document.getElementById('teamsSharedDevicesUsed')!.textContent = teamsSharedDevices.used.toString();
             document.getElementById('teamsSharedDevicesAvailable')!.textContent = teamsSharedDevices.available.toString();
+        } else {
+            // Display error message in the license section
+            const message = document.createElement('div');
+            message.id = 'licenseInfoError';
+            message.classList.add('license-info-error');
+            message.textContent = result.error || 'No license information available';
+            
+            // Set counts to zero
+            document.getElementById('teamsRoomsProTotal')!.textContent = '0';
+            document.getElementById('teamsRoomsProUsed')!.textContent = '0';
+            document.getElementById('teamsRoomsProAvailable')!.textContent = '0';
+            document.getElementById('teamsSharedDevicesTotal')!.textContent = '0';
+            document.getElementById('teamsSharedDevicesUsed')!.textContent = '0';
+            document.getElementById('teamsSharedDevicesAvailable')!.textContent = '0';
+            
+            // Add message to the section
+            const licenseInfoSection = document.querySelector('.license-info-section');
+            if (licenseInfoSection) {
+                licenseInfoSection.appendChild(message);
+            }
         }
     } catch (error) {
         console.error('Error loading license information:', error);
+        
+        // Display generic error message
+        const message = document.createElement('div');
+        message.id = 'licenseInfoError';
+        message.classList.add('license-info-error');
+        message.textContent = 'Unable to retrieve license information';
+        
+        // Set counts to zero
+        document.getElementById('teamsRoomsProTotal')!.textContent = '0';
+        document.getElementById('teamsRoomsProUsed')!.textContent = '0';
+        document.getElementById('teamsRoomsProAvailable')!.textContent = '0';
+        document.getElementById('teamsSharedDevicesTotal')!.textContent = '0';
+        document.getElementById('teamsSharedDevicesUsed')!.textContent = '0';
+        document.getElementById('teamsSharedDevicesAvailable')!.textContent = '0';
+        
+        // Add message to the section
+        const licenseInfoSection = document.querySelector('.license-info-section');
+        if (licenseInfoSection) {
+            licenseInfoSection.appendChild(message);
+        }
     } finally {
         // Remove spinning class from refresh button
         if (refreshBtn) {

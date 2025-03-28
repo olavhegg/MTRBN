@@ -132,16 +132,37 @@ class GraphService {
         };
     }> {
         try {
+            logger.info('getLicenseInfo: Starting license information retrieval');
+            console.log('getLicenseInfo: Getting client...');
             const client = await this.groupService.getClient();
+            console.log('getLicenseInfo: Client obtained, fetching SKUs...');
             
             // Get all subscribed SKUs
             const response = await client.api('/subscribedSkus')
                 .get();
+                
+            console.log('getLicenseInfo: SKUs response received:', JSON.stringify(response, null, 2));
             
             // Teams Rooms Pro and Teams Shared Devices service plan IDs
             // Note: These IDs might need adjustment based on actual SKU IDs in the tenant
-            const teamsRoomsProSkuId = '4bfd1bba-80ef-4d97-b412-cae9fce26935'; // Teams Rooms Pro
-            const teamsSharedDevicesSkuId = '82023f10-53c7-4e1a-a6a1-4cf5855e05bd'; // Teams Shared Devices
+            const teamsRoomsProSkuIds = [
+                '4bfd1bba-80ef-4d97-b412-cae9fce26935', // Teams Rooms Pro
+                '7d141db8-116a-41c8-8177-8583fb82ef3c', // Teams Rooms Standard
+                '3150e09c-660d-4172-8d9f-315b02e68fa9', // Teams Rooms Basic
+                'c32e5ec6-84ad-48b7-8c31-d530d2f1fddf', // Teams Room Standard
+                '4fb214cb-a430-4a91-9c91-ae0e77d1b15e'  // Meeting Room
+            ];
+            
+            const teamsSharedDevicesSkuIds = [
+                '82023f10-53c7-4e1a-a6a1-4cf5855e05bd', // Teams Shared Devices
+                'e17df04e-9e0a-4352-8ce4-8b406b05fbac', // Common Area Phone
+                '3cbcca0e-ad57-4461-ab60-d432187892db', // Shared Comms Plan
+                'd354a4f0-ec2c-4e2b-953e-dc6d2cfc6308'  // Teams Shared Device
+            ];
+            
+            logger.info(`getLicenseInfo: Looking for service plans with IDs: 
+                Teams Rooms Pro: ${teamsRoomsProSkuIds.join(', ')}, 
+                Teams Shared Devices: ${teamsSharedDevicesSkuIds.join(', ')}`);
             
             let teamsRoomsProInfo = {
                 total: 0,
@@ -157,32 +178,72 @@ class GraphService {
             
             // Process each SKU to find Teams licenses
             if (response && response.value) {
+                logger.info(`getLicenseInfo: Found ${response.value.length} SKUs to process`);
+                
                 for (const sku of response.value) {
+                    console.log(`getLicenseInfo: Processing SKU: ${sku.skuPartNumber} (${sku.skuId})`);
+                    
+                    // Validate that service plans exist
+                    if (!sku.servicePlans || !Array.isArray(sku.servicePlans)) {
+                        console.warn(`getLicenseInfo: No service plans found for SKU ${sku.skuPartNumber} or invalid format`, sku);
+                        continue;
+                    }
+                    
+                    console.log(`getLicenseInfo: Service plans in this SKU:`, 
+                        sku.servicePlans.map((p: any) => `${p.servicePlanName} (${p.servicePlanId})`).join(', '));
+                    
                     // Check if this SKU contains a Teams Rooms Pro service plan
-                    const isTeamsRoomsPro = sku.servicePlans.some((plan: any) => 
-                        plan.servicePlanName.includes('Teams Room Pro') ||
-                        plan.servicePlanName.includes('MEETING_ROOM') ||
-                        plan.servicePlanId === teamsRoomsProSkuId);
+                    const isTeamsRoomsPro = sku.servicePlans.some((plan: any) => {
+                        const matches = 
+                            plan.servicePlanName.toLowerCase().includes('teams room') ||
+                            plan.servicePlanName.toLowerCase().includes('meeting room') ||
+                            teamsRoomsProSkuIds.includes(plan.servicePlanId);
+                            
+                        if (matches) {
+                            console.log(`getLicenseInfo: Found Teams Rooms Pro in plan: ${plan.servicePlanName} (${plan.servicePlanId})`);
+                        }
+                        
+                        return matches;
+                    });
                     
                     // Check if this SKU contains a Teams Shared Devices service plan
-                    const isTeamsSharedDevices = sku.servicePlans.some((plan: any) => 
-                        plan.servicePlanName.includes('Teams Shared Device') ||
-                        plan.servicePlanName.includes('MEETING_ROOM_DEVICE') ||
-                        plan.servicePlanId === teamsSharedDevicesSkuId);
+                    const isTeamsSharedDevices = sku.servicePlans.some((plan: any) => {
+                        const matches = 
+                            plan.servicePlanName.toLowerCase().includes('shared device') ||
+                            plan.servicePlanName.toLowerCase().includes('common area') ||
+                            teamsSharedDevicesSkuIds.includes(plan.servicePlanId);
+                            
+                        if (matches) {
+                            console.log(`getLicenseInfo: Found Teams Shared Devices in plan: ${plan.servicePlanName} (${plan.servicePlanId})`);
+                        }
+                        
+                        return matches;
+                    });
                     
                     if (isTeamsRoomsPro) {
+                        console.log(`getLicenseInfo: Adding Teams Rooms Pro license counts from SKU ${sku.skuPartNumber}`);
+                        console.log(`getLicenseInfo: Enabled: ${sku.prepaidUnits.enabled}, Consumed: ${sku.consumedUnits}`);
                         teamsRoomsProInfo.total += sku.prepaidUnits.enabled;
                         teamsRoomsProInfo.used += sku.consumedUnits;
                         teamsRoomsProInfo.available = teamsRoomsProInfo.total - teamsRoomsProInfo.used;
                     }
                     
                     if (isTeamsSharedDevices) {
+                        console.log(`getLicenseInfo: Adding Teams Shared Devices license counts from SKU ${sku.skuPartNumber}`);
+                        console.log(`getLicenseInfo: Enabled: ${sku.prepaidUnits.enabled}, Consumed: ${sku.consumedUnits}`);
                         teamsSharedDevicesInfo.total += sku.prepaidUnits.enabled;
                         teamsSharedDevicesInfo.used += sku.consumedUnits;
                         teamsSharedDevicesInfo.available = teamsSharedDevicesInfo.total - teamsSharedDevicesInfo.used;
                     }
                 }
+            } else {
+                logger.warn('getLicenseInfo: No SKUs found in the response');
+                console.log('getLicenseInfo: Response data structure:', response);
             }
+            
+            logger.info(`getLicenseInfo: Final license counts - 
+                Teams Rooms Pro: Total=${teamsRoomsProInfo.total}, Used=${teamsRoomsProInfo.used}, Available=${teamsRoomsProInfo.available}
+                Teams Shared Devices: Total=${teamsSharedDevicesInfo.total}, Used=${teamsSharedDevicesInfo.used}, Available=${teamsSharedDevicesInfo.available}`);
             
             return {
                 success: true,
@@ -192,6 +253,20 @@ class GraphService {
                 }
             };
         } catch (error) {
+            console.error('getLicenseInfo: Detailed error:', error);
+            if (error instanceof Error) {
+                console.error(`getLicenseInfo: Error name: ${error.name}, message: ${error.message}`);
+                if ('code' in error) {
+                    console.error(`getLicenseInfo: Error code: ${(error as any).code}`);
+                }
+                if ('statusCode' in error) {
+                    console.error(`getLicenseInfo: Status code: ${(error as any).statusCode}`);
+                }
+                if ('body' in error) {
+                    console.error(`getLicenseInfo: Response body: ${JSON.stringify((error as any).body, null, 2)}`);
+                }
+            }
+            
             logger.error('Error getting license information:', error);
             return {
                 success: false,
